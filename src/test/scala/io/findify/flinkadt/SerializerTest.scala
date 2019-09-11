@@ -9,7 +9,7 @@ import org.apache.flink.core.memory.{DataInputViewStreamWrapper, DataOutputViewS
 import org.scalatest.{FlatSpec, Inspectors, Matchers}
 
 class SerializerTest extends FlatSpec with Matchers with Inspectors {
-  import org.apache.flink.api.scala._
+  import org.apache.flink.api.scala.createTypeInformation
   import api._
   it should "derive serializer for simple class" in {
     val ser = gen[Simple]

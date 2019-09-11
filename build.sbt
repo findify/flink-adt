@@ -1,6 +1,6 @@
 name := "flink-adt"
 
-version := "0.1-M1"
+version := "0.1-M2"
 
 scalaVersion := "2.12.10"
 crossScalaVersions := Seq("2.12.10", "2.11.12")
@@ -16,8 +16,8 @@ bintrayVcsUrl := Some("git@github.com:findify/flink-adt.git")
 lazy val flinkVersion = "1.9.0"
 
 libraryDependencies ++= Seq(
-  "com.propensive"                   %% "magnolia"                   % "0.11.0" exclude ("org.scala-lang", "scala-compiler"),
-  "org.apache.flink"          %% "flink-scala"                % flinkVersion % "provided" exclude ("org.scala-lang", "scala-compiler"),
-  "org.apache.flink"          %% "flink-streaming-scala"      % flinkVersion % "provided" exclude ("org.scala-lang", "scala-compiler"),
+  "com.propensive"                   %% "magnolia"                   % "0.11.0",
+  "org.apache.flink"          %% "flink-scala"                % flinkVersion % "provided",
+  "org.apache.flink"          %% "flink-streaming-scala"      % flinkVersion % "provided",
   "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 )

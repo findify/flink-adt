@@ -23,9 +23,5 @@ object api {
 
   implicit def gen[T]: TypeSerializer[T] = macro Magnolia.gen[T]
 
-  implicit def typeInfo[T: ClassTag](implicit serializer: TypeSerializer[T]): TypeInformation[T] =
-    ProductTypeInfo[T](serializer)
-
   implicit def defaultSerializer[T](implicit ti: TypeInformation[T]): TypeSerializer[T] = ti.createSerializer(ec)
-
 }
