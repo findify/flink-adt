@@ -12,7 +12,7 @@ homepage := Some(url("https://github.com/findify/flink-adt"))
 publishMavenStyle := true
 bintrayOrganization := Some("findify")
 
-
+bintrayVcsUrl := Some("git@github.com:findify/flink-adt.git")
 lazy val flinkVersion = "1.9.0"
 
 libraryDependencies ++= Seq(
