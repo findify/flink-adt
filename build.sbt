@@ -1,6 +1,6 @@
 name := "flink-adt"
 
-version := "0.1-M2"
+version := "0.1-M7"
 
 scalaVersion := "2.12.10"
 crossScalaVersions := Seq("2.12.10", "2.11.12")
@@ -19,5 +19,6 @@ libraryDependencies ++= Seq(
   "com.propensive"                   %% "magnolia"                   % "0.11.0",
   "org.apache.flink"          %% "flink-scala"                % flinkVersion % "provided",
   "org.apache.flink"          %% "flink-streaming-scala"      % flinkVersion % "provided",
-  "org.scalatest" %% "scalatest" % "3.0.8" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.8" % "test",
+  "org.typelevel" %% "cats-core" % "1.6.1"
 )

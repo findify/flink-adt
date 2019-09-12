@@ -1,4 +1,4 @@
-package io.findify.flinkadt
+package io.findify.flinkadt.core
 
 import magnolia.Subtype
 import org.apache.flink.api.common.typeutils.base.TypeSerializerSingleton
@@ -24,7 +24,9 @@ class CoproductSerializer[T](subtypes: Array[Subtype[TypeSerializer, T]]) extend
   override def copy(from: T): T = from
   override def copy(from: T, reuse: T): T = from
   override def copy(source: DataInputView, target: DataOutputView): Unit = serialize(deserialize(source), target)
-  override def createInstance(): T = ???
+  override def createInstance(): T =
+    // this one may be used for later reuse, but we never reuse coproducts due to their unclear concrete type
+    subtypes.head.typeclass.createInstance()
   override def getLength: Int = -1
   override def serialize(record: T, target: DataOutputView): Unit =
     dispatch(record) { sub =>

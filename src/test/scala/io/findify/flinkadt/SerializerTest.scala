@@ -2,15 +2,16 @@ package io.findify.flinkadt
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import io.findify.flinkadt.SerializerTest.{ADT, Bar, Foo, Nested, Simple, SimpleJava, WrappedADT}
+import io.findify.flinkadt.SerializerTest.{ADT, ADT2, Bar, Bar2, Foo, Foo2, Nested, Simple, SimpleJava, WrappedADT}
+import io.findify.flinkadt.core.ProductSerializer
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
 import org.apache.flink.core.memory.{DataInputViewStreamWrapper, DataOutputViewStreamWrapper}
 import org.scalatest.{FlatSpec, Inspectors, Matchers}
 
 class SerializerTest extends FlatSpec with Matchers with Inspectors {
-  import org.apache.flink.api.scala.createTypeInformation
   import api._
+  import io.findify.flinkadt.instances.all._
   it should "derive serializer for simple class" in {
     val ser = gen[Simple]
     roundtrip(ser, Simple(1, "foo"))
@@ -36,12 +37,23 @@ class SerializerTest extends FlatSpec with Matchers with Inspectors {
     noKryo(ser)
   }
 
+  it should "derive for ADTs with case objects" in {
+    val ser = gen[ADT2]
+    roundtrip(ser, Foo2)
+    roundtrip(ser, Bar2)
+    noKryo(ser)
+  }
+
   it should "derive for nested ADTs" in {
     implicit val ser1 = gen[ADT]
     val ser = gen[WrappedADT]
     roundtrip(ser, WrappedADT(Foo("a")))
     roundtrip(ser, WrappedADT(Bar(1)))
     noKryo(ser)
+  }
+
+  it should "derive seq" in {
+    val ser = implicitly[TypeSerializer[Seq[Simple]]]
   }
 
   def roundtrip[T](ser: TypeSerializer[T], in: T) = {
@@ -71,6 +83,10 @@ object SerializerTest {
   sealed trait ADT
   case class Foo(a: String) extends ADT
   case class Bar(b: Int) extends ADT
+
+  sealed trait ADT2
+  case object Foo2 extends ADT2
+  case object Bar2 extends ADT2
 
   case class WrappedADT(x: ADT)
 }

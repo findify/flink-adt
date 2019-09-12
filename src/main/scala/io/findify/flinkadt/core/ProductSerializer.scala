@@ -1,7 +1,6 @@
-package io.findify.flinkadt
+package io.findify.flinkadt.core
 
 import magnolia.{CaseClass, Param}
-import org.apache.flink.api.common.typeutils.base.TypeSerializerSingleton
 import org.apache.flink.api.common.typeutils.{SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot}
 import org.apache.flink.core.memory.{DataInputView, DataOutputView}
 

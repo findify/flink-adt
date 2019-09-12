@@ -1,6 +1,5 @@
-package io.findify.flinkadt
+package io.findify.flinkadt.core
 
-import magnolia.CaseClass
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.TypeSerializer

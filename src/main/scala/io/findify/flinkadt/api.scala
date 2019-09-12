@@ -1,16 +1,15 @@
 package io.findify.flinkadt
 
-
+import io.findify.flinkadt.core.{CoproductSerializer, ProductSerializer, ProductTypeInfo}
 import magnolia.{CaseClass, Magnolia, SealedTrait}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.TypeSerializer
 
-import scala.language.experimental.macros
 import scala.reflect.ClassTag
+import scala.language.experimental.macros
 
 object api {
-
   lazy val ec = new ExecutionConfig()
   type Typeclass[T] = TypeSerializer[T]
 
@@ -24,4 +23,5 @@ object api {
   implicit def gen[T]: TypeSerializer[T] = macro Magnolia.gen[T]
 
   implicit def defaultSerializer[T](implicit ti: TypeInformation[T]): TypeSerializer[T] = ti.createSerializer(ec)
+  implicit def typeInfoFromSerializer[T: ClassTag](implicit ts: TypeSerializer[T]): TypeInformation[T] = ProductTypeInfo(ts)
 }
