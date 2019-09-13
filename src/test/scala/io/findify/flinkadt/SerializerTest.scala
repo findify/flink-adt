@@ -56,6 +56,10 @@ class SerializerTest extends FlatSpec with Matchers with Inspectors {
     val ser = implicitly[TypeSerializer[Seq[Simple]]]
   }
 
+  it should "derive seq of seq" in {
+    val ser = implicitly[TypeSerializer[Seq[Seq[Simple]]]]
+  }
+
   def roundtrip[T](ser: TypeSerializer[T], in: T) = {
     val out = new ByteArrayOutputStream()
     ser.serialize(in, new DataOutputViewStreamWrapper(out))
