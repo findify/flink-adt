@@ -11,6 +11,7 @@ object all {
   implicit val longSerializer: TypeSerializer[Long] = new LongSerializer()
   implicit val floatSerializer: TypeSerializer[Float] = new FloatSerializer()
   implicit val doubleSerializer: TypeSerializer[Double] = new DoubleSerializer()
+  implicit val booleanSerializer: TypeSerializer[Boolean] = new BooleanSerializer()
 
   implicit def optionSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Option[T]] = new OptionSerializer[T](vs)
   implicit def listSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[List[T]] = new ListSerializer[T](vs)
