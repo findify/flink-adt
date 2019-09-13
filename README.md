@@ -10,8 +10,9 @@ more Scala-specific TypeSerializer & TypeInformation derivation support.
 * experimental support of VarLength-style encoding of arrays of primitives
 
 TODO:
-* moar testing
-* not all Scala and Java types are supported out of the box
+* moar testing.
+* make artifacts available on maven for different Flink versions. Currently only 1.9 is supported, but it may also work with other versions.
+* not all Scala and Java types are supported out of the box.
 
 ## Usage
 
@@ -22,7 +23,7 @@ For SBT, add this snippet to `build.sbt`:
 ```scala
 resolvers += Resolver.bintrayRepo("findify", "maven")
 
-libraryDependencies += "io.findify" %% "flink-adt" % "0.1-M7"
+libraryDependencies += "io.findify" %% "flink-adt" % "0.1-M8"
 ```
 
 To use the library, you need to change the way you import Flink's serialization support. 
