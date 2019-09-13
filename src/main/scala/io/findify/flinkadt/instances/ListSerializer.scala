@@ -2,8 +2,14 @@ package io.findify.flinkadt.instances
 
 import io.findify.flinkadt.instances.IntSerializer.IntSerializerSnapshot
 import io.findify.flinkadt.instances.ListSerializer.ListSerializerSnapshot
-import org.apache.flink.api.common.typeutils.{CompositeSerializer, CompositeTypeSerializerSnapshot, SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot}
-import org.apache.flink.core.memory.{DataInputView, DataOutputView}
+import org.apache.flink.api.common.typeutils.{
+  CompositeSerializer,
+  CompositeTypeSerializerSnapshot,
+  SimpleTypeSerializerSnapshot,
+  TypeSerializer,
+  TypeSerializerSnapshot
+}
+import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 class ListSerializer[T](child: TypeSerializer[T]) extends SimpleSerializer[List[T]] {
   override def createInstance(): List[T] = List.empty[T]
@@ -26,5 +32,6 @@ class ListSerializer[T](child: TypeSerializer[T]) extends SimpleSerializer[List[
 }
 
 object ListSerializer {
-  case class ListSerializerSnapshot[T](self: TypeSerializer[List[T]]) extends SimpleTypeSerializerSnapshot[List[T]]( () => self)
+  case class ListSerializerSnapshot[T](self: TypeSerializer[List[T]])
+      extends SimpleTypeSerializerSnapshot[List[T]](() => self)
 }

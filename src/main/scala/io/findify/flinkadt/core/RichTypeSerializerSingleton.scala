@@ -1,7 +1,7 @@
 package io.findify.flinkadt.core
 
 import org.apache.flink.api.common.typeutils.base.TypeSerializerSingleton
-import org.apache.flink.core.memory.{DataInputView, DataOutputView}
+import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 trait RichTypeSerializerSingleton[T] extends TypeSerializerSingleton[T] {
   override def isImmutableType: Boolean = true

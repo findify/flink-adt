@@ -1,10 +1,11 @@
 package io.findify.flinkadt.core
 
-import magnolia.{CaseClass, Param}
-import org.apache.flink.api.common.typeutils.{SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot}
-import org.apache.flink.core.memory.{DataInputView, DataOutputView}
+import magnolia.{ CaseClass, Param }
+import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot }
+import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
-class ProductSerializer[T](val params: Array[Param[TypeSerializer, T]], val ctx: CaseClass[TypeSerializer, T] ) extends RichTypeSerializerSingleton[T] {
+class ProductSerializer[T](val params: Array[Param[TypeSerializer, T]], val ctx: CaseClass[TypeSerializer, T])
+    extends RichTypeSerializerSingleton[T] {
   override def createInstance(): T = ctx.construct { param =>
     param.default
   }

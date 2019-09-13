@@ -1,8 +1,8 @@
 package io.findify.flinkadt.instances
 
 import io.findify.flinkadt.instances.IntSerializer.IntSerializerSnapshot
-import org.apache.flink.api.common.typeutils.{SimpleTypeSerializerSnapshot, TypeSerializerSnapshot}
-import org.apache.flink.core.memory.{DataInputView, DataOutputView}
+import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializerSnapshot }
+import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 class IntSerializer extends SimpleSerializer[Int] {
   override def createInstance(): Int = 0

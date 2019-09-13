@@ -2,8 +2,8 @@ package io.findify.flinkadt.instances
 
 import io.findify.flinkadt.instances.IntSerializer.IntSerializerSnapshot
 import io.findify.flinkadt.instances.LongSerializer.LongSerializerSnapshot
-import org.apache.flink.api.common.typeutils.{SimpleTypeSerializerSnapshot, TypeSerializerSnapshot}
-import org.apache.flink.core.memory.{DataInputView, DataOutputView}
+import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializerSnapshot }
+import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 class LongSerializer extends SimpleSerializer[Long] {
   override def createInstance(): Long = 0

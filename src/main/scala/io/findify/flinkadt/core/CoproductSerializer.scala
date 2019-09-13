@@ -2,12 +2,12 @@ package io.findify.flinkadt.core
 
 import magnolia.Subtype
 import org.apache.flink.api.common.typeutils.base.TypeSerializerSingleton
-import org.apache.flink.api.common.typeutils.{SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot}
-import org.apache.flink.core.memory.{DataInputView, DataOutputView}
+import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot }
+import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 import scala.annotation.tailrec
 
-class CoproductSerializer[T](subtypes: Array[Subtype[TypeSerializer, T]]) extends TypeSerializerSingleton[T]{
+class CoproductSerializer[T](subtypes: Array[Subtype[TypeSerializer, T]]) extends TypeSerializerSingleton[T] {
   def dispatch[Return](value: T)(handle: Subtype[TypeSerializer, T] => Return): Return = {
     @tailrec def rec(ix: Int): Return =
       if (ix < subtypes.length) {
@@ -30,10 +30,10 @@ class CoproductSerializer[T](subtypes: Array[Subtype[TypeSerializer, T]]) extend
   override def getLength: Int = -1
   override def serialize(record: T, target: DataOutputView): Unit =
     dispatch(record) { sub =>
-    {
-      target.writeByte(sub.index)
-      sub.typeclass.serialize(sub.cast(record), target)
-    }
+      {
+        target.writeByte(sub.index)
+        sub.typeclass.serialize(sub.cast(record), target)
+      }
     }
   override def deserialize(source: DataInputView): T = {
     val index = source.readByte()

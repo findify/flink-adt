@@ -1,7 +1,7 @@
 package io.findify.flinkadt.instances
 
 import org.apache.flink.api.common.typeutils.base.TypeSerializerSingleton
-import org.apache.flink.core.memory.{DataInputView, DataOutputView}
+import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 trait SimpleSerializer[T] extends TypeSerializerSingleton[T] {
   override def isImmutableType: Boolean = true
@@ -10,4 +10,3 @@ trait SimpleSerializer[T] extends TypeSerializerSingleton[T] {
   override def deserialize(reuse: T, source: DataInputView): T = deserialize(source)
   override def copy(source: DataInputView, target: DataOutputView): Unit = serialize(deserialize(source), target)
 }
-

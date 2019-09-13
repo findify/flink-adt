@@ -1,8 +1,8 @@
 package io.findify.flinkadt.instances
 
 import io.findify.flinkadt.instances.BooleanSerializer.BooleanSerializerSnapshot
-import org.apache.flink.api.common.typeutils.{SimpleTypeSerializerSnapshot, TypeSerializerSnapshot}
-import org.apache.flink.core.memory.{DataInputView, DataOutputView}
+import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializerSnapshot }
+import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 class BooleanSerializer extends SimpleSerializer[Boolean] {
   override def createInstance(): Boolean = false

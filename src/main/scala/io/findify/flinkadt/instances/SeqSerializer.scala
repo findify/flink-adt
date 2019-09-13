@@ -1,8 +1,8 @@
 package io.findify.flinkadt.instances
 
 import io.findify.flinkadt.instances.SeqSerializer.SeqSerializerSnapshot
-import org.apache.flink.api.common.typeutils.{SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot}
-import org.apache.flink.core.memory.{DataInputView, DataOutputView}
+import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot }
+import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 class SeqSerializer[T](child: TypeSerializer[T]) extends SimpleSerializer[Seq[T]] {
   override def createInstance(): Seq[T] = Seq.empty[T]
@@ -25,5 +25,6 @@ class SeqSerializer[T](child: TypeSerializer[T]) extends SimpleSerializer[Seq[T]
 }
 
 object SeqSerializer {
-  case class SeqSerializerSnapshot[T](self: TypeSerializer[Seq[T]]) extends SimpleTypeSerializerSnapshot[Seq[T]]( () => self)
+  case class SeqSerializerSnapshot[T](self: TypeSerializer[Seq[T]])
+      extends SimpleTypeSerializerSnapshot[Seq[T]](() => self)
 }

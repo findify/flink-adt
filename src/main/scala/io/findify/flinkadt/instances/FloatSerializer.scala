@@ -1,8 +1,8 @@
 package io.findify.flinkadt.instances
 
 import io.findify.flinkadt.instances.FloatSerializer.FloatSerializerSnapshot
-import org.apache.flink.api.common.typeutils.{SimpleTypeSerializerSnapshot, TypeSerializerSnapshot}
-import org.apache.flink.core.memory.{DataInputView, DataOutputView}
+import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializerSnapshot }
+import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 class FloatSerializer extends SimpleSerializer[Float] {
   override def createInstance(): Float = 0

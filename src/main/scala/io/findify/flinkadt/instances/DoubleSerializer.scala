@@ -1,8 +1,8 @@
 package io.findify.flinkadt.instances
 
 import io.findify.flinkadt.instances.DoubleSerializer.DoubleSerializerSnapshot
-import org.apache.flink.api.common.typeutils.{SimpleTypeSerializerSnapshot, TypeSerializerSnapshot}
-import org.apache.flink.core.memory.{DataInputView, DataOutputView}
+import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializerSnapshot }
+import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 class DoubleSerializer extends SimpleSerializer[Double] {
   override def createInstance(): Double = 0
