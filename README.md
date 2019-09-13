@@ -14,6 +14,11 @@ TODO:
 * make artifacts available on maven for different Flink versions. Currently only 1.9 is supported, but it may also work with other versions.
 * not all Scala and Java types are supported out of the box.
 
+Issues:
+* as this project relies on macro to derive TypeSerializer instances, if you're using IntelliJ, it may
+highlight your code with red, hinting that it cannot find corresponding implicits. And this is fine, the code
+compiles OK.
+
 ## Usage
 
 Build artifacts are not yet available, as everything is still very experimental.
