@@ -1,6 +1,6 @@
 name := "flink-adt"
 
-version := "0.1-M12"
+version := "0.1-M13"
 
 scalaVersion := "2.12.10"
 crossScalaVersions := Seq("2.12.10", "2.11.12")
