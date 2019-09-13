@@ -36,8 +36,9 @@ To use the library, you need to change the way you import Flink's serialization 
 
 So you should never do a wildcard import `import org.apache.flink.api.scala._`, but import only specific required classes from the `api.scala` package. And also add yet another set of imports:
 ```scala
-import io.findify.flinkadt.api._
-import io.findify.flinkadt.instances.all._
+  import io.findify.flinkadt.api.typeinfo._
+  import io.findify.flinkadt.api.serializer._
+  import io.findify.flinkadt.instances.all._
 ```
 
 Then you can write your code as usual, so Flink will use the serialization support from this library.
