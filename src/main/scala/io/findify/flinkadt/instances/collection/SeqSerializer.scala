@@ -1,6 +1,7 @@
-package io.findify.flinkadt.instances
+package io.findify.flinkadt.instances.collection
 
-import io.findify.flinkadt.instances.SeqSerializer.SeqSerializerSnapshot
+import io.findify.flinkadt.instances.SimpleSerializer
+import io.findify.flinkadt.instances.collection.SeqSerializer.SeqSerializerSnapshot
 import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot }
 import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 

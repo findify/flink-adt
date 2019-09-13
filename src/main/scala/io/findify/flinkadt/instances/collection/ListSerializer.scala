@@ -1,14 +1,8 @@
-package io.findify.flinkadt.instances
+package io.findify.flinkadt.instances.collection
 
-import io.findify.flinkadt.instances.IntSerializer.IntSerializerSnapshot
-import io.findify.flinkadt.instances.ListSerializer.ListSerializerSnapshot
-import org.apache.flink.api.common.typeutils.{
-  CompositeSerializer,
-  CompositeTypeSerializerSnapshot,
-  SimpleTypeSerializerSnapshot,
-  TypeSerializer,
-  TypeSerializerSnapshot
-}
+import io.findify.flinkadt.instances.SimpleSerializer
+import io.findify.flinkadt.instances.collection.ListSerializer.ListSerializerSnapshot
+import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot }
 import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 class ListSerializer[T](child: TypeSerializer[T]) extends SimpleSerializer[List[T]] {
