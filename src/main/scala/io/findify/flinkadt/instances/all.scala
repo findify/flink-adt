@@ -1,42 +1,37 @@
 package io.findify.flinkadt.instances
 
 import cats.data.NonEmptyList
-import io.findify.flinkadt.instances.collection.{
-  ArraySerializer,
-  ListSerializer,
-  MapSerializer,
-  NonEmptyListSerializer,
-  SeqSerializer,
-  SetSerializer
+import io.findify.flinkadt.instances.serializer.collection._
+import io.findify.flinkadt.instances.serializer.primitive._
+import io.findify.flinkadt.instances.typeinfo.collection.{
+  ArrayTypeInformation,
+  ListTypeInformation,
+  MapTypeInformation,
+  NonEmptyListTypeInformation,
+  SeqTypeInformation,
+  SetTypeInformation
 }
-import io.findify.flinkadt.instances.primitive.{
-  BooleanSerializer,
-  ByteSerializer,
-  CharSerializer,
-  DoubleSerializer,
-  FloatSerializer,
-  IntSerializer,
-  LongSerializer,
-  ShortSerializer
+import io.findify.flinkadt.instances.typeinfo.primitive.{
+  BooleanTypeInformation,
+  ByteTypeInformation,
+  CharTypeInformation,
+  DoubleTypeInformation,
+  FloatTypeInformation,
+  IntTypeInformation,
+  LongTypeInformation,
+  ShortTypeInformation
 }
-import org.apache.flink.api.common.typeutils.TypeSerializer
-import org.apache.flink.api.common.typeutils.base.StringSerializer
-import org.apache.flink.api.common.typeutils.base.array.{
-  BooleanPrimitiveArraySerializer,
-  BytePrimitiveArraySerializer,
-  CharPrimitiveArraySerializer,
-  DoublePrimitiveArraySerializer,
-  FloatPrimitiveArraySerializer,
-  IntPrimitiveArraySerializer,
-  LongPrimitiveArraySerializer,
-  ShortPrimitiveArraySerializer,
-  StringArraySerializer
-}
+import org.apache.flink.api.common.typeinfo.{ BasicTypeInfo, TypeInformation }
+import org.apache.flink.api.common.typeutils.{ TypeComparator, TypeSerializer }
+import org.apache.flink.api.common.typeutils.base.{ StringComparator, StringSerializer }
+import org.apache.flink.api.common.typeutils.base.array._
 import org.apache.flink.api.scala.typeutils.{ EitherSerializer, OptionSerializer }
 
 import scala.reflect.ClassTag
 
 object all {
+
+  // serializers
   implicit val stringSerializer: TypeSerializer[String] = new StringSerializer()
   implicit val intSerializer: TypeSerializer[Int] = new IntSerializer()
   implicit val longSerializer: TypeSerializer[Long] = new LongSerializer()
@@ -88,4 +83,53 @@ object all {
   implicit val jShortSerializer: TypeSerializer[java.lang.Short] =
     new org.apache.flink.api.common.typeutils.base.ShortSerializer()
 
+  // type infos
+  implicit val stringInfo: TypeInformation[String] = BasicTypeInfo.STRING_TYPE_INFO
+  implicit val intInfo: TypeInformation[Int] = IntTypeInformation()
+  implicit val boolInfo: TypeInformation[Boolean] = BooleanTypeInformation()
+  implicit val byteInfo: TypeInformation[Byte] = ByteTypeInformation()
+  implicit val charInfo: TypeInformation[Char] = CharTypeInformation()
+  implicit val doubleInfo: TypeInformation[Double] = DoubleTypeInformation()
+  implicit val floatInfo: TypeInformation[Float] = FloatTypeInformation()
+  implicit val longInfo: TypeInformation[Long] = LongTypeInformation()
+  implicit val shortInfo: TypeInformation[Short] = ShortTypeInformation()
+
+  // java
+  implicit val jIntegerInfo: TypeInformation[java.lang.Integer] = BasicTypeInfo.INT_TYPE_INFO
+  implicit val jLongInfo: TypeInformation[java.lang.Long] = BasicTypeInfo.LONG_TYPE_INFO
+  implicit val jFloatInfo: TypeInformation[java.lang.Float] = BasicTypeInfo.FLOAT_TYPE_INFO
+  implicit val jDoubleInfo: TypeInformation[java.lang.Double] = BasicTypeInfo.DOUBLE_TYPE_INFO
+  implicit val jBooleanInfo: TypeInformation[java.lang.Boolean] = BasicTypeInfo.BOOLEAN_TYPE_INFO
+  implicit val jByteInfo: TypeInformation[java.lang.Byte] = BasicTypeInfo.BYTE_TYPE_INFO
+  implicit val jCharInfo: TypeInformation[java.lang.Character] = BasicTypeInfo.CHAR_TYPE_INFO
+  implicit val jShortInfo: TypeInformation[java.lang.Short] = BasicTypeInfo.SHORT_TYPE_INFO
+
+  implicit def listInfo[T: ClassTag: TypeInformation](implicit ts: TypeSerializer[T],
+                                                      ls: TypeSerializer[List[T]]): TypeInformation[List[T]] =
+    new ListTypeInformation[T]()
+
+  implicit def seqInfo[T: ClassTag: TypeInformation](implicit ts: TypeSerializer[T],
+                                                     ls: TypeSerializer[Seq[T]]): TypeInformation[Seq[T]] =
+    new SeqTypeInformation[T]()
+
+  implicit def setInfo[T: ClassTag: TypeInformation](implicit ts: TypeSerializer[T],
+                                                     ls: TypeSerializer[Set[T]]): TypeInformation[Set[T]] =
+    new SetTypeInformation[T]()
+
+  implicit def nelInfo[T: ClassTag: TypeInformation](
+      implicit ts: TypeSerializer[T],
+      ls: TypeSerializer[NonEmptyList[T]]
+  ): TypeInformation[NonEmptyList[T]] =
+    new NonEmptyListTypeInformation[T]()
+
+  implicit def arrayInfo[T: ClassTag: TypeInformation](implicit ts: TypeSerializer[T],
+                                                       ls: TypeSerializer[Array[T]]): TypeInformation[Array[T]] =
+    new ArrayTypeInformation[T]()
+
+  implicit def mapInfo[K: ClassTag: TypeInformation, V: ClassTag: TypeInformation](
+      implicit ks: TypeSerializer[K],
+      vs: TypeSerializer[V],
+      ms: TypeSerializer[Map[K, V]]
+  ): TypeInformation[Map[K, V]] =
+    new MapTypeInformation[K, V]()
 }

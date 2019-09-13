@@ -4,6 +4,7 @@ This is a prototype of Magnolia-based serializer framework for Apache Flink, wit
 more Scala-specific TypeSerializer & TypeInformation derivation support.
 
 * can support ADTs (Algebraic data types, sealed trait hierarchies)
+* correctly handles `case object` 
 * can be extended with custom serializers even for deeply-nested types
 * has no fallback to Kryo
 * reuses all the low-level serialization code from Flink for basic Java and Scala types
