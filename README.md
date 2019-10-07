@@ -22,26 +22,24 @@ compiles OK.
 
 ## Usage
 
-Build artifacts are not yet available, as everything is still very experimental.
-But if you like to have some risk in your life, then there are snapshots on a Findify's bintray repo. 
-
-For SBT, add this snippet to `build.sbt`:
+`flink-adt` is released to Maven-central. For SBT, add this snippet to `build.sbt`:
 ```scala
-resolvers += Resolver.bintrayRepo("findify", "maven")
-
-libraryDependencies += "io.findify" %% "flink-adt" % "0.1-M8"
+libraryDependencies += "io.findify" %% "flink-adt" % "0.2"
 ```
 
 To use the library, you need to change the way you import Flink's serialization support. 
 
-So you should never do a wildcard import `import org.apache.flink.api.scala._`, but import only specific required classes from the `api.scala` package. And also add yet another set of imports:
+So you should never do a wildcard import `import org.apache.flink.api.scala._`, but import 
+only specific required classes from the `api.scala` package. 
+And also add yet another set of imports:
 ```scala
   import io.findify.flinkadt.api.typeinfo._
   import io.findify.flinkadt.api.serializer._
   import io.findify.flinkadt.instances.all._
 ```
 
-Then you can write your code as usual, so Flink will use the serialization support from this library.
+Then you can write your code as usual, so Flink will use the serialization support 
+from this library.
 
 ## Licence
 
