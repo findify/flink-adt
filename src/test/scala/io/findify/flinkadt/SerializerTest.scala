@@ -1,8 +1,20 @@
 package io.findify.flinkadt
 
-import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
+import java.io.{ ByteArrayInputStream, ByteArrayOutputStream, ObjectOutputStream }
 
-import io.findify.flinkadt.SerializerTest.{ ADT, ADT2, Bar, Bar2, Foo, Foo2, Nested, Simple, SimpleJava, WrappedADT }
+import io.findify.flinkadt.SerializerTest.{
+  ADT,
+  ADT2,
+  Annotated,
+  Bar,
+  Bar2,
+  Foo,
+  Foo2,
+  Nested,
+  Simple,
+  SimpleJava,
+  WrappedADT
+}
 import io.findify.flinkadt.api.serializer.ProductSerializer
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
@@ -60,6 +72,12 @@ class SerializerTest extends FlatSpec with Matchers with Inspectors {
     val ser = implicitly[TypeSerializer[Seq[Seq[Simple]]]]
   }
 
+  it should "be serializable in case of annotations" in {
+    val ser = implicitly[TypeSerializer[Annotated]]
+    val stream = new ObjectOutputStream(new ByteArrayOutputStream())
+    stream.writeObject(ser)
+  }
+
   def roundtrip[T](ser: TypeSerializer[T], in: T) = {
     val out = new ByteArrayOutputStream()
     ser.serialize(in, new DataOutputViewStreamWrapper(out))
@@ -94,4 +112,7 @@ object SerializerTest {
   case object Bar2 extends ADT2
 
   case class WrappedADT(x: ADT)
+
+  @SerialVersionUID(1L)
+  case class Annotated(foo: String)
 }
