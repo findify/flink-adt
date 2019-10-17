@@ -24,7 +24,7 @@ compiles OK.
 
 `flink-adt` is released to Maven-central. For SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.findify" %% "flink-adt" % "0.2"
+libraryDependencies += "io.findify" %% "flink-adt" % "0.2.1"
 ```
 
 To use the library, you need to change the way you import Flink's serialization support. 
