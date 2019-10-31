@@ -9,7 +9,8 @@ import io.findify.flinkadt.instances.typeinfo.collection.{
   MapTypeInformation,
   NonEmptyListTypeInformation,
   SeqTypeInformation,
-  SetTypeInformation
+  SetTypeInformation,
+  VectorTypeInformation
 }
 import io.findify.flinkadt.instances.typeinfo.primitive.{
   BooleanTypeInformation,
@@ -45,6 +46,8 @@ object all {
   implicit def optionSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Option[T]] =
     new OptionSerializer[T](vs)
   implicit def listSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[List[T]] = new ListSerializer[T](vs)
+  implicit def vectorSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Vector[T]] =
+    new VectorSerializer[T](vs)
   implicit def arraySerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Array[T]] =
     new ArraySerializer[T](vs)
   implicit def setSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Set[T]] = new SetSerializer[T](vs)
@@ -111,6 +114,10 @@ object all {
   implicit def seqInfo[T: ClassTag: TypeInformation](implicit ts: TypeSerializer[T],
                                                      ls: TypeSerializer[Seq[T]]): TypeInformation[Seq[T]] =
     new SeqTypeInformation[T]()
+
+  implicit def vectorInfo[T: ClassTag: TypeInformation](implicit ts: TypeSerializer[T],
+                                                        ls: TypeSerializer[Vector[T]]): TypeInformation[Vector[T]] =
+    new VectorTypeInformation[T]()
 
   implicit def setInfo[T: ClassTag: TypeInformation](implicit ts: TypeSerializer[T],
                                                      ls: TypeSerializer[Set[T]]): TypeInformation[Set[T]] =
