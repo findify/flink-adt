@@ -5,6 +5,7 @@ import java.io.{ ByteArrayInputStream, ByteArrayOutputStream, ObjectOutputStream
 import io.findify.flinkadt.SerializerTest.{
   ADT,
   ADT2,
+  Ann,
   Annotated,
   Bar,
   Bar2,
@@ -72,8 +73,14 @@ class SerializerTest extends FlatSpec with Matchers with Inspectors {
     val ser = implicitly[TypeSerializer[Seq[Seq[Simple]]]]
   }
 
-  it should "be serializable in case of annotations" in {
+  it should "be serializable in case of annotations on classes" in {
     val ser = implicitly[TypeSerializer[Annotated]]
+    val stream = new ObjectOutputStream(new ByteArrayOutputStream())
+    stream.writeObject(ser)
+  }
+
+  it should "be serializable in case of annotations on subtypes" in {
+    val ser = implicitly[TypeSerializer[Ann]]
     val stream = new ObjectOutputStream(new ByteArrayOutputStream())
     stream.writeObject(ser)
   }
@@ -115,4 +122,8 @@ object SerializerTest {
 
   @SerialVersionUID(1L)
   case class Annotated(foo: String)
+
+  sealed trait Ann
+  @SerialVersionUID(1L)
+  case class Next(foo: String) extends Ann
 }

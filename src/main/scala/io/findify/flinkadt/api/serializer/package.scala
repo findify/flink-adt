@@ -1,6 +1,6 @@
 package io.findify.flinkadt.api
 
-import magnolia.{ CaseClass, Magnolia, SealedTrait }
+import magnolia.{ CaseClass, Magnolia, SealedTrait, Subtype }
 import org.apache.flink.api.common.typeutils.TypeSerializer
 
 import scala.collection.mutable
@@ -19,8 +19,17 @@ package object serializer {
   }
 
   def dispatch[T](ctx: SealedTrait[TypeSerializer, T]): TypeSerializer[T] = {
+    // we wipe all top-level annotations
     val ann = ctx.annotations.asInstanceOf[mutable.WrappedArray[Any]]
     ann.indices.foreach(i => ann.update(i, null))
+    // and all annotations on subtypes
+    val subtypes = ctx.subtypes.asInstanceOf[mutable.WrappedArray[Subtype[Typeclass, _]]]
+    for {
+      subtype <- subtypes
+      ai      <- subtype.annotationsArray.indices
+    } {
+      subtype.annotationsArray(ai) = null
+    }
     new CoproductSerializer[T](ctx)
   }
 
