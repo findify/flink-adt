@@ -28,7 +28,7 @@ import org.apache.flink.api.common.typeutils.base.{ StringComparator, StringSeri
 import org.apache.flink.api.common.typeutils.base.array._
 import org.apache.flink.api.scala.typeutils.{ EitherSerializer, OptionSerializer }
 
-import scala.reflect.ClassTag
+import scala.reflect.{ classTag, ClassTag }
 
 object all {
 
@@ -45,18 +45,22 @@ object all {
 
   implicit def optionSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Option[T]] =
     new OptionSerializer[T](vs)
-  implicit def listSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[List[T]] = new ListSerializer[T](vs)
-  implicit def vectorSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Vector[T]] =
-    new VectorSerializer[T](vs)
+  implicit def listSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[List[T]] =
+    new ListSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
+  implicit def vectorSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Vector[T]] =
+    new VectorSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
   implicit def arraySerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Array[T]] =
-    new ArraySerializer[T](vs)
-  implicit def setSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Set[T]] = new SetSerializer[T](vs)
-  implicit def mapSerializer[K, V](implicit ks: TypeSerializer[K], vs: TypeSerializer[V]): TypeSerializer[Map[K, V]] =
+    new ArraySerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
+  implicit def setSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Set[T]] =
+    new SetSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
+  implicit def mapSerializer[K: ClassTag, V: ClassTag](implicit ks: TypeSerializer[K],
+                                                       vs: TypeSerializer[V]): TypeSerializer[Map[K, V]] =
     new MapSerializer[K, V](ks, vs)
-  implicit def seqSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Seq[T]] = new SeqSerializer[T](vs)
-  implicit def nelSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[NonEmptyList[T]] =
-    new NonEmptyListSerializer[T](vs)
-  implicit def eitherSerializer[L, R](implicit ls: TypeSerializer[L], rs: TypeSerializer[R]) =
+  implicit def seqSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Seq[T]] =
+    new SeqSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
+  implicit def nelSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[NonEmptyList[T]] =
+    new NonEmptyListSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
+  implicit def eitherSerializer[L: ClassTag, R: ClassTag](implicit ls: TypeSerializer[L], rs: TypeSerializer[R]) =
     new EitherSerializer[L, R](ls, rs)
 
   implicit val intArraySerializer: TypeSerializer[Array[Int]] = new IntPrimitiveArraySerializer()

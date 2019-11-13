@@ -14,30 +14,35 @@ import io.findify.flinkadt.instances.all._
 class SerializerSnapshotTest extends FlatSpec with Matchers {
   it should "roundtrip product serializer snapshot" in {
     val ser = implicitly[TypeSerializer[SimpleClass1]]
-    roundtrip(ser)
+    roundtripSerializer(ser)
   }
 
   it should "roundtrip coproduct serializer snapshot" in {
     val ser = implicitly[TypeSerializer[OuterTrait]]
-    roundtrip(ser)
+    roundtripSerializer(ser)
   }
 
   it should "do array ser snapshot" in {
     val set = implicitly[TypeSerializer[Array[SimpleClass1]]]
-    roundtrip(set)
+    roundtripSerializer(set)
   }
 
   it should "do map ser snapshot" in {
     val set = implicitly[TypeSerializer[Map[SimpleClass1, String]]]
-    roundtrip(set)
+    roundtripSerializer(set)
+  }
+
+  it should "do list ser snapshot" in {
+    val set = implicitly[TypeSerializer[List[SimpleClass1]]]
+    roundtripSerializer(set)
   }
 
   it should "do map ser snapshot adt " in {
     val set = implicitly[TypeSerializer[Map[OuterTrait, String]]]
-    roundtrip(set)
+    roundtripSerializer(set)
   }
 
-  def roundtrip[T](ser: TypeSerializer[T]) = {
+  def roundtripSerializer[T](ser: TypeSerializer[T]) = {
     val snap = ser.snapshotConfiguration()
     val buffer = new ByteArrayOutputStream()
     val output = new DataOutputViewStreamWrapper(buffer)
@@ -47,6 +52,7 @@ class SerializerSnapshotTest extends FlatSpec with Matchers {
     snap.readSnapshot(1, input, ClassLoader.getSystemClassLoader)
     val restored = snap.restoreSerializer()
   }
+
 }
 
 object SerializerSnapshotTest {

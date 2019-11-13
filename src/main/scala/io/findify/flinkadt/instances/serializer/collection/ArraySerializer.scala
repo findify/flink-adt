@@ -6,7 +6,8 @@ import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 import scala.reflect.ClassTag
 
-class ArraySerializer[T: ClassTag](val child: TypeSerializer[T]) extends SimpleSerializer[Array[T]] {
+class ArraySerializer[T](val child: TypeSerializer[T], clazz: Class[T]) extends SimpleSerializer[Array[T]] {
+  implicit val classTag: ClassTag[T] = ClassTag(clazz)
   override def createInstance(): Array[T] = Array.empty[T]
   override def getLength: Int = -1
   override def deserialize(source: DataInputView): Array[T] = {
@@ -23,7 +24,7 @@ class ArraySerializer[T: ClassTag](val child: TypeSerializer[T]) extends SimpleS
     record.foreach(element => child.serialize(element, target))
   }
   override def snapshotConfiguration(): TypeSerializerSnapshot[Array[T]] =
-    CollectionSerializerSnapshot(child, new ArraySerializer[T](_))
+    new CollectionSerializerSnapshot(child, classOf[ArraySerializer[T]], clazz)
 
   // CollectionSerializerSnapshot(child, new Serializer[T](_))
 

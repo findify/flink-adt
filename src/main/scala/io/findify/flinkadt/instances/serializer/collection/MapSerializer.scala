@@ -40,6 +40,7 @@ class MapSerializer[K, V](ks: TypeSerializer[K], vs: TypeSerializer[V]) extends 
 object MapSerializer {
   case class MapSerializerSnapshot[K, V](var keySerializer: TypeSerializer[K], var valueSerializer: TypeSerializer[V])
       extends TypeSerializerSnapshot[Map[K, V]] {
+    def this() = this(null, null)
     override def getCurrentVersion: Int = 1
 
     override def readSnapshot(readVersion: Int, in: DataInputView, userCodeClassLoader: ClassLoader): Unit = {

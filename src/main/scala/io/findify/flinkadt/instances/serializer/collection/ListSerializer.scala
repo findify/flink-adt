@@ -4,7 +4,9 @@ import io.findify.flinkadt.api.serializer.SimpleSerializer
 import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot }
 import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
-class ListSerializer[T](child: TypeSerializer[T]) extends SimpleSerializer[List[T]] {
+import scala.reflect.ClassTag
+
+class ListSerializer[T](child: TypeSerializer[T], clazz: Class[T]) extends SimpleSerializer[List[T]] {
   override def createInstance(): List[T] = List.empty[T]
   override def getLength: Int = -1
   override def deserialize(source: DataInputView): List[T] = {
@@ -21,6 +23,6 @@ class ListSerializer[T](child: TypeSerializer[T]) extends SimpleSerializer[List[
     record.foreach(element => child.serialize(element, target))
   }
   override def snapshotConfiguration(): TypeSerializerSnapshot[List[T]] =
-    CollectionSerializerSnapshot[List, T, ListSerializer[T]](child, new ListSerializer[T](_))
+    new CollectionSerializerSnapshot(child, classOf[ListSerializer[T]], clazz)
 
 }
