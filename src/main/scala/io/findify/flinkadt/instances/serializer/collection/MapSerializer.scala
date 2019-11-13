@@ -2,8 +2,16 @@ package io.findify.flinkadt.instances.serializer.collection
 
 import io.findify.flinkadt.api.serializer.SimpleSerializer
 import io.findify.flinkadt.instances.serializer.collection.MapSerializer.MapSerializerSnapshot
-import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot }
+import org.apache.flink.api.common.typeutils.{
+  SimpleTypeSerializerSnapshot,
+  TypeSerializer,
+  TypeSerializerSchemaCompatibility,
+  TypeSerializerSnapshot
+}
 import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
+import org.apache.flink.util.InstantiationUtil
+
+import scala.reflect.ClassTag
 
 class MapSerializer[K, V](ks: TypeSerializer[K], vs: TypeSerializer[V]) extends SimpleSerializer[Map[K, V]] {
   override def createInstance(): Map[K, V] = Map.empty[K, V]
@@ -26,11 +34,41 @@ class MapSerializer[K, V](ks: TypeSerializer[K], vs: TypeSerializer[V]) extends 
       vs.serialize(element._2, target)
     })
   }
-  override def snapshotConfiguration(): TypeSerializerSnapshot[Map[K, V]] = new MapSerializerSnapshot(this)
-
+  override def snapshotConfiguration(): TypeSerializerSnapshot[Map[K, V]] = new MapSerializerSnapshot(ks, vs)
 }
 
 object MapSerializer {
-  case class MapSerializerSnapshot[K, V](self: TypeSerializer[Map[K, V]])
-      extends SimpleTypeSerializerSnapshot[Map[K, V]](() => self)
+  case class MapSerializerSnapshot[K, V](var keySerializer: TypeSerializer[K], var valueSerializer: TypeSerializer[V])
+      extends TypeSerializerSnapshot[Map[K, V]] {
+    override def getCurrentVersion: Int = 1
+
+    override def readSnapshot(readVersion: Int, in: DataInputView, userCodeClassLoader: ClassLoader): Unit = {
+      keySerializer = readSerializer[K](readVersion, in, userCodeClassLoader)
+      valueSerializer = readSerializer[V](readVersion, in, userCodeClassLoader)
+    }
+
+    def readSerializer[T](readVersion: Int, in: DataInputView, userCodeClassLoader: ClassLoader) = {
+      val snapClass = InstantiationUtil.resolveClassByName[TypeSerializerSnapshot[T]](in, userCodeClassLoader)
+      val nestedSnapshot = InstantiationUtil.instantiate(snapClass)
+      nestedSnapshot.readSnapshot(nestedSnapshot.getCurrentVersion, in, userCodeClassLoader)
+      nestedSnapshot.restoreSerializer()
+    }
+
+    override def writeSnapshot(out: DataOutputView): Unit = {
+      writeSerializer[K](keySerializer, out)
+      writeSerializer[V](valueSerializer, out)
+    }
+
+    def writeSerializer[T](nestedSerializer: TypeSerializer[T], out: DataOutputView) = {
+      out.writeUTF(nestedSerializer.snapshotConfiguration().getClass.getName)
+      nestedSerializer.snapshotConfiguration().writeSnapshot(out)
+    }
+
+    override def resolveSchemaCompatibility(
+        newSerializer: TypeSerializer[Map[K, V]]
+    ): TypeSerializerSchemaCompatibility[Map[K, V]] = TypeSerializerSchemaCompatibility.compatibleAsIs()
+
+    override def restoreSerializer(): TypeSerializer[Map[K, V]] = new MapSerializer(keySerializer, valueSerializer)
+  }
+
 }

@@ -1,13 +1,12 @@
 package io.findify.flinkadt.instances.serializer.collection
 
 import io.findify.flinkadt.api.serializer.SimpleSerializer
-import io.findify.flinkadt.instances.serializer.collection.ArraySerializer.ArraySerializerSnapshot
-import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot }
+import org.apache.flink.api.common.typeutils.{ TypeSerializer, TypeSerializerSnapshot }
 import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 import scala.reflect.ClassTag
 
-class ArraySerializer[T: ClassTag](child: TypeSerializer[T]) extends SimpleSerializer[Array[T]] {
+class ArraySerializer[T: ClassTag](val child: TypeSerializer[T]) extends SimpleSerializer[Array[T]] {
   override def createInstance(): Array[T] = Array.empty[T]
   override def getLength: Int = -1
   override def deserialize(source: DataInputView): Array[T] = {
@@ -23,11 +22,9 @@ class ArraySerializer[T: ClassTag](child: TypeSerializer[T]) extends SimpleSeria
     target.writeInt(record.length)
     record.foreach(element => child.serialize(element, target))
   }
-  override def snapshotConfiguration(): TypeSerializerSnapshot[Array[T]] = new ArraySerializerSnapshot(this)
+  override def snapshotConfiguration(): TypeSerializerSnapshot[Array[T]] =
+    CollectionSerializerSnapshot(child, new ArraySerializer[T](_))
 
-}
+  // CollectionSerializerSnapshot(child, new Serializer[T](_))
 
-object ArraySerializer {
-  case class ArraySerializerSnapshot[T](self: TypeSerializer[Array[T]])
-      extends SimpleTypeSerializerSnapshot[Array[T]](() => self)
 }

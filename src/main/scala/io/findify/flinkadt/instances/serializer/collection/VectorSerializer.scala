@@ -1,7 +1,6 @@
 package io.findify.flinkadt.instances.serializer.collection
 
 import io.findify.flinkadt.api.serializer.SimpleSerializer
-import io.findify.flinkadt.instances.serializer.collection.VectorSerializer.VectorSerializerSnapshot
 import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot }
 import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
@@ -21,11 +20,7 @@ class VectorSerializer[T](child: TypeSerializer[T]) extends SimpleSerializer[Vec
     target.writeInt(record.size)
     record.foreach(element => child.serialize(element, target))
   }
-  override def snapshotConfiguration(): TypeSerializerSnapshot[Vector[T]] = new VectorSerializerSnapshot(this)
+  override def snapshotConfiguration(): TypeSerializerSnapshot[Vector[T]] =
+    CollectionSerializerSnapshot(child, new VectorSerializer[T](_))
 
-}
-
-object VectorSerializer {
-  case class VectorSerializerSnapshot[T](self: TypeSerializer[Vector[T]])
-      extends SimpleTypeSerializerSnapshot[Vector[T]](() => self)
 }

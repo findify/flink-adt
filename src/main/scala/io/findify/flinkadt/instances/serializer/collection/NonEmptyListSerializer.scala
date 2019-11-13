@@ -2,7 +2,6 @@ package io.findify.flinkadt.instances.serializer.collection
 
 import cats.data.NonEmptyList
 import io.findify.flinkadt.api.serializer.SimpleSerializer
-import io.findify.flinkadt.instances.serializer.collection.NonEmptyListSerializer.NonEmptyListSerializerSnapshot
 import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot }
 import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
@@ -24,11 +23,6 @@ class NonEmptyListSerializer[T](child: TypeSerializer[T]) extends SimpleSerializ
     record.toList.foreach(element => child.serialize(element, target))
   }
   override def snapshotConfiguration(): TypeSerializerSnapshot[NonEmptyList[T]] =
-    new NonEmptyListSerializerSnapshot(this)
+    CollectionSerializerSnapshot(child, new NonEmptyListSerializer[T](_))
 
-}
-
-object NonEmptyListSerializer {
-  case class NonEmptyListSerializerSnapshot[T](self: TypeSerializer[NonEmptyList[T]])
-      extends SimpleTypeSerializerSnapshot[NonEmptyList[T]](() => self)
 }

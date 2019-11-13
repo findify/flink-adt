@@ -1,8 +1,17 @@
 package io.findify.flinkadt.api.serializer
 
-import magnolia.{ SealedTrait, Subtype }
+import java.io.{ ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream }
+
+import io.findify.flinkadt.api.serializer.CoproductSerializer.CoproductSerializerSnapshot
+import magnolia.{ SealedTrait, Subtype, TypeName }
 import org.apache.flink.api.common.typeutils.base.TypeSerializerSingleton
-import org.apache.flink.api.common.typeutils.{ SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot }
+import org.apache.flink.api.common.typeutils.{
+  GenericTypeSerializerSnapshot,
+  SimpleTypeSerializerSnapshot,
+  TypeSerializer,
+  TypeSerializerSchemaCompatibility,
+  TypeSerializerSnapshot
+}
 import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
 
 class CoproductSerializer[T](ctx: SealedTrait[TypeSerializer, T]) extends TypeSerializerSingleton[T] {
@@ -27,7 +36,40 @@ class CoproductSerializer[T](ctx: SealedTrait[TypeSerializer, T]) extends TypeSe
     subtype.typeclass.deserialize(source)
   }
   override def deserialize(reuse: T, source: DataInputView): T = deserialize(source)
-  override def snapshotConfiguration(): TypeSerializerSnapshot[T] = CoproductCodecSnapshot
-  object CoproductCodecSnapshot extends SimpleTypeSerializerSnapshot[T](() => this)
+  override def snapshotConfiguration(): TypeSerializerSnapshot[T] = new CoproductSerializerSnapshot(ctx)
+}
 
+object CoproductSerializer {
+  class CoproductSerializerSnapshot[T]() extends TypeSerializerSnapshot[T] {
+    var context: SealedTrait[TypeSerializer, T] = _
+    def this(ctx: SealedTrait[TypeSerializer, T]) = {
+      this()
+      context = ctx
+    }
+    override def readSnapshot(readVersion: Int, in: DataInputView, userCodeClassLoader: ClassLoader): Unit = {
+      val len = in.readInt()
+      val bytes = new Array[Byte](len)
+      in.read(bytes)
+      val buffer = new ByteArrayInputStream(bytes)
+      val objStream = new ObjectInputStream(buffer)
+      context = objStream.readObject().asInstanceOf[SealedTrait[TypeSerializer, T]]
+    }
+
+    override def getCurrentVersion: Int = 1
+
+    override def writeSnapshot(out: DataOutputView): Unit = {
+      val buffer = new ByteArrayOutputStream()
+      val stream = new ObjectOutputStream(buffer)
+      stream.writeObject(context)
+      val bytes = buffer.toByteArray
+      out.writeInt(bytes.length)
+      out.write(bytes)
+    }
+
+    override def resolveSchemaCompatibility(newSerializer: TypeSerializer[T]): TypeSerializerSchemaCompatibility[T] =
+      TypeSerializerSchemaCompatibility.compatibleAsIs()
+
+    override def restoreSerializer(): TypeSerializer[T] =
+      new CoproductSerializer[T](context)
+  }
 }

@@ -1,6 +1,6 @@
 name := "flink-adt"
 
-version := "0.2.3"
+version := "0.3.0-M1"
 
 scalaVersion := "2.12.10"
 
@@ -9,11 +9,11 @@ licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
 homepage := Some(url("https://github.com/findify/flink-adt"))
 
 publishMavenStyle := true
-//bintrayOrganization := Some("findify")
+bintrayOrganization := Some("findify")
 
-//bintrayVcsUrl := Some("git@github.com:findify/flink-adt.git")
+bintrayVcsUrl := Some("git@github.com:findify/flink-adt.git")
 
-publishTo := sonatypePublishToBundle.value
+//publishTo := sonatypePublishToBundle.value
 
 lazy val flinkVersion = "1.9.0"
 

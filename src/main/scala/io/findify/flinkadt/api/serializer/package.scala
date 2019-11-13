@@ -5,7 +5,7 @@ import org.apache.flink.api.common.typeutils.TypeSerializer
 
 import scala.collection.mutable
 import scala.language.experimental.macros
-import scala.reflect.ClassTag
+import scala.reflect.{ classTag, ClassTag }
 
 package object serializer {
   type Typeclass[T] = TypeSerializer[T]
@@ -15,7 +15,7 @@ package object serializer {
     // as some of annotations like SerialVersionUID itself are not serializable
     val ann = ctx.annotations.asInstanceOf[mutable.WrappedArray[Any]]
     ann.indices.foreach(i => ann.update(i, null))
-    new ProductSerializer[T](ctx)
+    new ProductSerializer[T](ctx, classTag[T].runtimeClass.asInstanceOf[Class[T]])
   }
 
   def dispatch[T](ctx: SealedTrait[TypeSerializer, T]): TypeSerializer[T] = {
