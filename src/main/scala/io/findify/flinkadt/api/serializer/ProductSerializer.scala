@@ -41,7 +41,7 @@ object ProductSerializer {
     override def readSnapshot(readVersion: Int, in: DataInputView, userCodeClassLoader: ClassLoader): Unit = {
       val len = in.readInt()
       val bytes = new Array[Byte](len)
-      in.read(bytes)
+      in.readFully(bytes)
       val buffer = new ByteArrayInputStream(bytes)
       val objStream = new ObjectInputStream(buffer)
       context = objStream.readObject().asInstanceOf[CaseClass[TypeSerializer, T]]
