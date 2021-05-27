@@ -23,8 +23,8 @@ libraryDependencies ++= Seq(
 
 scmInfo := Some(
   ScmInfo(
-    url("https://github.com/findify/featury"),
-    "scm:git@github.com:findify/featury.git"
+    url("https://github.com/findify/flink-adt"),
+    "scm:git@github.com:findify/flink-adt.git"
   )
 )
 developers := List(
