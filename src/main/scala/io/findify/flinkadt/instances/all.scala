@@ -1,12 +1,10 @@
 package io.findify.flinkadt.instances
 
-import cats.data.NonEmptyList
 import io.findify.flinkadt.instances.serializer.collection._
 import io.findify.flinkadt.instances.typeinfo.collection.{
   ArrayTypeInformation,
   ListTypeInformation,
   MapTypeInformation,
-  NonEmptyListTypeInformation,
   SeqTypeInformation,
   SetTypeInformation,
   VectorTypeInformation
@@ -14,7 +12,6 @@ import io.findify.flinkadt.instances.typeinfo.collection.{
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.api.common.typeutils.{TypeComparator, TypeSerializer}
-import org.apache.flink.api.common.typeutils.base.{StringComparator, StringSerializer}
 import org.apache.flink.api.common.typeutils.base.array._
 import org.apache.flink.api.scala.typeutils.{EitherSerializer, OptionSerializer, TraversableSerializer}
 import org.apache.flink.api.scala.createTypeInformation
@@ -28,7 +25,6 @@ object all {
   implicit def optionSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Option[T]] =
     new OptionSerializer[T](vs)
   implicit def listSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[List[T]] =
-    //new TraversableSerializer[List[T], T](vs, ???)
     new ListSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
   implicit def vectorSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Vector[T]] =
     new VectorSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
@@ -43,8 +39,6 @@ object all {
     new MapSerializer[K, V](ks, vs)
   implicit def seqSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Seq[T]] =
     new SeqSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
-  implicit def nelSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[NonEmptyList[T]] =
-    new NonEmptyListSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
   implicit def eitherSerializer[L: ClassTag, R: ClassTag](implicit ls: TypeSerializer[L], rs: TypeSerializer[R]) =
     new EitherSerializer[L, R](ls, rs)
 
@@ -129,12 +123,6 @@ object all {
       ls: TypeSerializer[Set[T]]
   ): TypeInformation[Set[T]] =
     new SetTypeInformation[T]()
-
-  implicit def nelInfo[T: ClassTag: TypeInformation](implicit
-      ts: TypeSerializer[T],
-      ls: TypeSerializer[NonEmptyList[T]]
-  ): TypeInformation[NonEmptyList[T]] =
-    new NonEmptyListTypeInformation[T]()
 
   implicit def arrayInfo[T: ClassTag: TypeInformation](implicit
       ts: TypeSerializer[T],

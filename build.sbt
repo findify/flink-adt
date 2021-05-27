@@ -18,7 +18,15 @@ libraryDependencies ++= Seq(
   "com.propensive"                   %% "magnolia"                   % "0.17.0",
   "org.apache.flink"          %% "flink-scala"                % flinkVersion % "provided",
   "org.apache.flink"          %% "flink-streaming-scala"      % flinkVersion % "provided",
-  "org.scalatest" %% "scalatest" % "3.0.9" % "test",
-  "org.typelevel" %% "cats-core" % "2.6.1"
+  "org.scalatest" %% "scalatest" % "3.0.9" % "test"
 )
 
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/findify/featury"),
+    "scm:git@github.com:findify/featury.git"
+  )
+)
+developers := List(
+  Developer(id = "romangrebennikov", name = "Roman Grebennikov", email = "grv@dfdx.me", url = url("https://dfdx.me/"))
+)
