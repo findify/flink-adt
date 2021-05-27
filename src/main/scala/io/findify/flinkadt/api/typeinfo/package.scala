@@ -1,7 +1,6 @@
 package io.findify.flinkadt.api
 
-import io.findify.flinkadt.api.serializer.{ CoproductSerializer, ProductSerializer }
-import magnolia.{ CaseClass, Magnolia, SealedTrait }
+import magnolia.{CaseClass, Magnolia, SealedTrait}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import scala.language.experimental.macros

@@ -3,7 +3,6 @@ package io.findify.flinkadt
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import io.findify.flinkadt.SerializerSnapshotTest.{ OuterTrait, SimpleClass1 }
-import io.findify.flinkadt.api.serializer.{ ProductSerializer, SimpleSerializer }
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import org.apache.flink.core.memory.{ DataInputViewStreamWrapper, DataOutputViewStreamWrapper }
 import org.scalatest.{ FlatSpec, Matchers }
@@ -49,7 +48,7 @@ class SerializerSnapshotTest extends FlatSpec with Matchers {
     snap.writeSnapshot(output)
     output.close()
     val input = new DataInputViewStreamWrapper(new ByteArrayInputStream(buffer.toByteArray))
-    snap.readSnapshot(1, input, ClassLoader.getSystemClassLoader)
+    snap.readSnapshot(ser.snapshotConfiguration().getCurrentVersion, input, ClassLoader.getSystemClassLoader)
     val restored = snap.restoreSerializer()
   }
 

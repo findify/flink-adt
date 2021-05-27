@@ -8,20 +8,20 @@ import org.apache.flink.api.common.typeutils.{
   TypeSerializerSchemaCompatibility,
   TypeSerializerSnapshot
 }
-import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
+import org.apache.flink.core.memory.{DataInputView, DataOutputView}
 import org.apache.flink.util.InstantiationUtil
 
 import scala.reflect.ClassTag
 
 class MapSerializer[K, V](ks: TypeSerializer[K], vs: TypeSerializer[V]) extends SimpleSerializer[Map[K, V]] {
   override def createInstance(): Map[K, V] = Map.empty[K, V]
-  override def getLength: Int = -1
+  override def getLength: Int              = -1
   override def deserialize(source: DataInputView): Map[K, V] = {
     val count = source.readInt()
     val result = for {
       _ <- 0 until count
     } yield {
-      val key = ks.deserialize(source)
+      val key   = ks.deserialize(source)
       val value = vs.deserialize(source)
       key -> value
     }
@@ -49,7 +49,7 @@ object MapSerializer {
     }
 
     def readSerializer[T](readVersion: Int, in: DataInputView, userCodeClassLoader: ClassLoader) = {
-      val snapClass = InstantiationUtil.resolveClassByName[TypeSerializerSnapshot[T]](in, userCodeClassLoader)
+      val snapClass      = InstantiationUtil.resolveClassByName[TypeSerializerSnapshot[T]](in, userCodeClassLoader)
       val nestedSnapshot = InstantiationUtil.instantiate(snapClass)
       nestedSnapshot.readSnapshot(nestedSnapshot.getCurrentVersion, in, userCodeClassLoader)
       nestedSnapshot.restoreSerializer()

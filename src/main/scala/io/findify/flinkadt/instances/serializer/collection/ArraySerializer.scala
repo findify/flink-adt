@@ -1,15 +1,15 @@
 package io.findify.flinkadt.instances.serializer.collection
 
 import io.findify.flinkadt.api.serializer.SimpleSerializer
-import org.apache.flink.api.common.typeutils.{ TypeSerializer, TypeSerializerSnapshot }
-import org.apache.flink.core.memory.{ DataInputView, DataOutputView }
+import org.apache.flink.api.common.typeutils.{TypeSerializer, TypeSerializerSnapshot}
+import org.apache.flink.core.memory.{DataInputView, DataOutputView}
 
 import scala.reflect.ClassTag
 
 class ArraySerializer[T](val child: TypeSerializer[T], clazz: Class[T]) extends SimpleSerializer[Array[T]] {
-  implicit val classTag: ClassTag[T] = ClassTag(clazz)
+  implicit val classTag: ClassTag[T]      = ClassTag(clazz)
   override def createInstance(): Array[T] = Array.empty[T]
-  override def getLength: Int = -1
+  override def getLength: Int             = -1
   override def deserialize(source: DataInputView): Array[T] = {
     val count = source.readInt()
     val result = for {

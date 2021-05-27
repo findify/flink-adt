@@ -5,6 +5,6 @@ import org.apache.flink.api.common.typeutils.TypeSerializer
 
 import scala.reflect.ClassTag
 
-case class MapTypeInformation[K: ClassTag: TypeSerializer, V: ClassTag: TypeSerializer](
-    implicit s: TypeSerializer[Map[K, V]]
+case class MapTypeInformation[K: ClassTag: TypeSerializer, V: ClassTag: TypeSerializer](implicit
+    s: TypeSerializer[Map[K, V]]
 ) extends SimpleTypeInformation[Map[K, V]] {}

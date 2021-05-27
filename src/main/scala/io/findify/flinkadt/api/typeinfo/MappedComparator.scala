@@ -2,7 +2,7 @@ package io.findify.flinkadt.api.typeinfo
 
 import org.apache.flink.api.common.typeutils.TypeComparator
 import org.apache.flink.api.common.typeutils.base.BasicTypeComparator
-import org.apache.flink.core.memory.{ DataInputView, DataOutputView, MemorySegment }
+import org.apache.flink.core.memory.{DataInputView, DataOutputView, MemorySegment}
 
 case class MappedComparator[T <: Comparable[T], S](map: S => T, parent: BasicTypeComparator[T])
     extends TypeComparator[S] {
@@ -11,9 +11,9 @@ case class MappedComparator[T <: Comparable[T], S](map: S => T, parent: BasicTyp
   override def putNormalizedKey(record: S, target: MemorySegment, offset: Int, numBytes: Int): Unit =
     parent.putNormalizedKey(map(record), target, offset, numBytes)
   override def isNormalizedKeyPrefixOnly(keyBytes: Int): Boolean = parent.isNormalizedKeyPrefixOnly(keyBytes)
-  override def supportsNormalizedKey(): Boolean = parent.supportsNormalizedKey()
-  override def getNormalizeKeyLen: Int = parent.getNormalizeKeyLen
-  override def duplicate(): TypeComparator[S] = new MappedComparator(map, parent)
+  override def supportsNormalizedKey(): Boolean                  = parent.supportsNormalizedKey()
+  override def getNormalizeKeyLen: Int                           = parent.getNormalizeKeyLen
+  override def duplicate(): TypeComparator[S]                    = new MappedComparator(map, parent)
 
   override def invertNormalizedKey(): Boolean = parent.invertNormalizedKey()
 

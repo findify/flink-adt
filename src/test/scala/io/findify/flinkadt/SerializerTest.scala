@@ -16,9 +16,9 @@ import io.findify.flinkadt.SerializerTest.{
   SimpleJava,
   WrappedADT
 }
-import io.findify.flinkadt.api.serializer.ProductSerializer
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
+import org.apache.flink.api.scala.typeutils.ScalaCaseClassSerializer
 import org.apache.flink.core.memory.{ DataInputViewStreamWrapper, DataOutputViewStreamWrapper }
 import org.scalatest.{ FlatSpec, Inspectors, Matchers }
 
@@ -51,6 +51,7 @@ class SerializerTest extends FlatSpec with Matchers with Inspectors {
   }
 
   it should "derive for ADTs with case objects" in {
+    val x = Bar2.getClass
     val ser = deriveSerializer[ADT2]
     //roundtrip(ser, Foo2)
     roundtrip(ser, Bar2)
@@ -94,9 +95,9 @@ class SerializerTest extends FlatSpec with Matchers with Inspectors {
 
   def noKryo[T](ser: TypeSerializer[T]): Unit =
     ser match {
-      case p: ProductSerializer[_] =>
-        forAll(p.ctx.parameters) { param =>
-          noKryo(param.typeclass)
+      case p: ScalaCaseClassSerializer[_] =>
+        forAll(p.getFieldSerializers) { param =>
+          noKryo(param)
         }
       case _: KryoSerializer[_] =>
         throw new IllegalArgumentException("kryo detected")
