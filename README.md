@@ -26,27 +26,18 @@ versions
 
 `flink-adt` is released to Maven-central. For SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.findify" %% "flink-adt" % "0.3.1"
+libraryDependencies += "io.findify" %% "flink-adt" % "0.4.0"
 ```
 
-This library trades convenience of the original flink scala api to the explicitness and correctness, so you may need to
-add a couple of boilerplate lines to your code.
+To use this library, swap `import org.apache.flink.api.scala._` with `import io.findify.flinkadt.api._` and enjoy.
 
 So to derive a TypeInformation for a sealed trait, you can do:
 ```scala
-import io.findify.flinkadt.api.typeinfo._
-import io.findify.flinkadt.api.serializer._
-import io.findify.flinkadt.instances.all._
+import io.findify.flinkadt.api._
 
 sealed trait Event
 case class Click(id: String) extends Event
 case class Purchase(price: Double) extends Event
-
-// first we derive the actual serializer used for IO tasks. The can automatically derive
-// serializers for all the case classes implementing the trait.
-implicit val eventSerializer = deriveADTSerializer[Event]
-// then we derive a wrapping TypeInformation class, which is required by all the flink api methods.
-implicit val eventTypeInfo = deriveTypeInformation[Event]
 
 // env is a StreamingExecutionEnvironment
 val result = env.fromCollection(List[Event](Click("1"), Purchase(1.0))).executeAndCollect(10)
@@ -55,7 +46,7 @@ val result = env.fromCollection(List[Event](Click("1"), Purchase(1.0))).executeA
 
 Be careful with a wildcard import of `import org.apache.flink.api.scala._`: it has a `createTypeInformation` implicit
 function, which may happily generate you a kryo-based serializer in a place you never expected. So in a case if you want
-to do this type of wildcard import, make sure that you explicitly called `deriveADTSerializer` and `deriveTypeInformation`
+to do this type of wildcard import, make sure that you explicitly called `deriveTypeInformation`
 for all the sealed traits in the current scope.
 
 ## Schema evolution
