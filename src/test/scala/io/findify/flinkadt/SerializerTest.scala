@@ -1,89 +1,82 @@
 package io.findify.flinkadt
 
-import java.io.{ ByteArrayInputStream, ByteArrayOutputStream, ObjectOutputStream }
+import io.findify.flinkadt.SerializerTest.DeeplyNested.ModeNested.SuperNested.{Egg, Food}
 
-import io.findify.flinkadt.SerializerTest.{
-  ADT,
-  ADT2,
-  Ann,
-  Annotated,
-  Bar,
-  Bar2,
-  Foo,
-  Foo2,
-  Nested,
-  Simple,
-  SimpleJava,
-  WrappedADT
-}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectOutputStream}
+import io.findify.flinkadt.SerializerTest.{ADT, ADT2, Ann, Annotated, Bar, Bar2, Foo, Foo2, Nested, Simple, SimpleJava, WrappedADT}
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
 import org.apache.flink.api.scala.typeutils.ScalaCaseClassSerializer
-import org.apache.flink.core.memory.{ DataInputViewStreamWrapper, DataOutputViewStreamWrapper }
-import org.scalatest.{ FlatSpec, Inspectors, Matchers }
+import org.apache.flink.core.memory.{DataInputViewStreamWrapper, DataOutputViewStreamWrapper}
+import org.scalatest.{FlatSpec, Inspectors, Matchers}
 
 class SerializerTest extends FlatSpec with Matchers with Inspectors {
   import io.findify.flinkadt.api.serializer.deriveSerializer
   import io.findify.flinkadt.instances.all._
   it should "derive serializer for simple class" in {
     val ser = deriveSerializer[Simple]
-    roundtrip(ser, Simple(1, "foo"))
-    noKryo(ser)
+    all(ser, Simple(1, "foo"))
   }
 
   it should "derive serializer for java classes" in {
     val ser = deriveSerializer[SimpleJava]
-    roundtrip(ser, SimpleJava(1, "foo"))
-    noKryo(ser)
+    all(ser, SimpleJava(1, "foo"))
   }
 
   it should "derive nested classes" in {
     val ser = deriveSerializer[Nested]
-    roundtrip(ser, Nested(Simple(1, "foo")))
-    noKryo(ser)
+    all(ser, Nested(Simple(1, "foo")))
   }
 
   it should "derive for ADTs" in {
     val ser = deriveSerializer[ADT]
-    roundtrip(ser, Foo("a"))
-    roundtrip(ser, Bar(1))
-    noKryo(ser)
+    all(ser, Foo("a"))
+    all(ser, Bar(1))
   }
 
   it should "derive for ADTs with case objects" in {
-    val x = Bar2.getClass
     val ser = deriveSerializer[ADT2]
-    //roundtrip(ser, Foo2)
-    roundtrip(ser, Bar2)
-    noKryo(ser)
+    all(ser, Foo2)
+    all(ser, Bar2)
+  }
+
+  it should "derive for deeply nested classes" in {
+    val ser = deriveSerializer[Egg]
+    all(ser, Egg(1))
+  }
+
+  it should "derive for deeply nested adts" in {
+    val ser = deriveSerializer[Food]
+    all(ser, Egg(1))
   }
 
   it should "derive for nested ADTs" in {
     implicit val ser1 = deriveSerializer[ADT]
     val ser = deriveSerializer[WrappedADT]
-    roundtrip(ser, WrappedADT(Foo("a")))
-    roundtrip(ser, WrappedADT(Bar(1)))
-    noKryo(ser)
+    all(ser, WrappedADT(Foo("a")))
+    all(ser, WrappedADT(Bar(1)))
   }
 
   it should "derive seq" in {
     val ser = implicitly[TypeSerializer[Seq[Simple]]]
+    noKryo(ser)
+    serializable(ser)
   }
 
   it should "derive seq of seq" in {
     val ser = implicitly[TypeSerializer[Seq[Seq[Simple]]]]
+    noKryo(ser)
+    serializable(ser)
   }
 
   it should "be serializable in case of annotations on classes" in {
     val ser = implicitly[TypeSerializer[Annotated]]
-    val stream = new ObjectOutputStream(new ByteArrayOutputStream())
-    stream.writeObject(ser)
+    serializable(ser)
   }
 
   it should "be serializable in case of annotations on subtypes" in {
     val ser = implicitly[TypeSerializer[Ann]]
-    val stream = new ObjectOutputStream(new ByteArrayOutputStream())
-    stream.writeObject(ser)
+    serializable(ser)
   }
 
   def roundtrip[T](ser: TypeSerializer[T], in: T) = {
@@ -103,6 +96,17 @@ class SerializerTest extends FlatSpec with Matchers with Inspectors {
         throw new IllegalArgumentException("kryo detected")
       case _ => // ok
     }
+
+  def serializable[T](ser: TypeSerializer[T]) = {
+    val stream = new ObjectOutputStream(new ByteArrayOutputStream())
+    stream.writeObject(ser)
+  }
+
+  def all[T](ser: TypeSerializer[T], in: T) = {
+    roundtrip(ser, in)
+    noKryo(ser)
+    serializable(ser)
+  }
 
 }
 
@@ -127,4 +131,14 @@ object SerializerTest {
   sealed trait Ann
   @SerialVersionUID(1L)
   case class Next(foo: String) extends Ann
+
+  object DeeplyNested {
+    object ModeNested {
+      object SuperNested {
+        sealed trait Food
+        case class Egg(i: Int) extends Food
+        case object Ham extends Food
+      }
+    }
+  }
 }

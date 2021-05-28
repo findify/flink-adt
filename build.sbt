@@ -1,6 +1,6 @@
 name := "flink-adt"
 
-version := "0.3.0-M2"
+version := "0.3.0"
 
 scalaVersion := "2.12.13"
 

@@ -1,11 +1,10 @@
 package io.findify.flinkadt
 
-import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
-
-import io.findify.flinkadt.SerializerSnapshotTest.{ OuterTrait, SimpleClass1 }
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import io.findify.flinkadt.SerializerSnapshotTest.{ADT2, OuterTrait, SimpleClass1}
 import org.apache.flink.api.common.typeutils.TypeSerializer
-import org.apache.flink.core.memory.{ DataInputViewStreamWrapper, DataOutputViewStreamWrapper }
-import org.scalatest.{ FlatSpec, Matchers }
+import org.apache.flink.core.memory.{DataInputViewStreamWrapper, DataOutputViewStreamWrapper}
+import org.scalatest.{FlatSpec, Matchers}
 import io.findify.flinkadt.api.typeinfo._
 import io.findify.flinkadt.api.serializer._
 import io.findify.flinkadt.instances.all._
@@ -18,6 +17,11 @@ class SerializerSnapshotTest extends FlatSpec with Matchers {
 
   it should "roundtrip coproduct serializer snapshot" in {
     val ser = implicitly[TypeSerializer[OuterTrait]]
+    roundtripSerializer(ser)
+  }
+
+  it should "roundtrip coproduct serializer snapshot with singletons" in {
+    val ser = implicitly[TypeSerializer[ADT2]]
     roundtripSerializer(ser)
   }
 
@@ -50,6 +54,7 @@ class SerializerSnapshotTest extends FlatSpec with Matchers {
     val input = new DataInputViewStreamWrapper(new ByteArrayInputStream(buffer.toByteArray))
     snap.readSnapshot(ser.snapshotConfiguration().getCurrentVersion, input, ClassLoader.getSystemClassLoader)
     val restored = snap.restoreSerializer()
+    ser shouldBe restored
   }
 
 }
@@ -58,4 +63,9 @@ object SerializerSnapshotTest {
   sealed trait OuterTrait
   case class SimpleClass1(a: String, b: Int) extends OuterTrait
   case class SimpleClass2(a: String, b: Long) extends OuterTrait
+
+  sealed trait ADT2
+  case object Foo2 extends ADT2
+  case object Bar2 extends ADT2
+
 }

@@ -8,12 +8,10 @@ more Scala-specific TypeSerializer & TypeInformation derivation support.
 * can be extended with custom serializers even for deeply-nested types
 * has no fallback to Kryo
 * reuses all the low-level serialization code from Flink for basic Java and Scala types
-* experimental support of VarLength-style encoding of arrays of primitives
 
 TODO:
 * moar testing.
-* make artifacts available on maven for different Flink versions. Currently only 1.9 is supported, but it may also work with other versions.
-* not all Scala and Java types are supported out of the box.
+* not all Scala and Java types are supported out of the box yet.
 
 Issues:
 * as this project relies on macro to derive TypeSerializer instances, if you're using IntelliJ, it may
@@ -24,7 +22,7 @@ compiles OK.
 
 `flink-adt` is released to Maven-central. For SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.findify" %% "flink-adt" % "0.2.1"
+libraryDependencies += "io.findify" %% "flink-adt" % "0.3.0"
 ```
 
 To use the library, you need to change the way you import Flink's serialization support. 
