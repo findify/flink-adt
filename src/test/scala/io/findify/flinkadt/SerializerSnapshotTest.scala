@@ -1,48 +1,48 @@
 package io.findify.flinkadt
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import io.findify.flinkadt.SerializerSnapshotTest.{ADT2, OuterTrait, SimpleClass1}
+import io.findify.flinkadt.SerializerSnapshotTest.{ADT2, OuterTrait, SimpleClass1, SimpleClassArray, SimpleClassList, SimpleClassMap1, SimpleClassMap2, TraitMap}
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import org.apache.flink.core.memory.{DataInputViewStreamWrapper, DataOutputViewStreamWrapper}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import io.findify.flinkadt.api.typeinfo._
 import io.findify.flinkadt.api.serializer._
 import io.findify.flinkadt.instances.all._
 
-class SerializerSnapshotTest extends FlatSpec with Matchers {
+class SerializerSnapshotTest extends AnyFlatSpec with Matchers {
+  implicit val s1 = deriveSerializer[SimpleClass1]
+  implicit val out = deriveADTSerializer[OuterTrait]
   it should "roundtrip product serializer snapshot" in {
-    val ser = implicitly[TypeSerializer[SimpleClass1]]
+    val ser = deriveSerializer[SimpleClass1]
     roundtripSerializer(ser)
   }
 
   it should "roundtrip coproduct serializer snapshot" in {
-    val ser = implicitly[TypeSerializer[OuterTrait]]
+    val ser = deriveADTSerializer[OuterTrait]
     roundtripSerializer(ser)
   }
 
   it should "roundtrip coproduct serializer snapshot with singletons" in {
-    val ser = implicitly[TypeSerializer[ADT2]]
+    val ser = deriveADTSerializer[ADT2]
     roundtripSerializer(ser)
   }
 
   it should "do array ser snapshot" in {
-    val set = implicitly[TypeSerializer[Array[SimpleClass1]]]
+    val set = deriveSerializer[SimpleClassArray]
     roundtripSerializer(set)
   }
 
   it should "do map ser snapshot" in {
-    val set = implicitly[TypeSerializer[Map[SimpleClass1, String]]]
-    roundtripSerializer(set)
+    roundtripSerializer(deriveSerializer[SimpleClassMap1])
+    roundtripSerializer(deriveSerializer[SimpleClassMap2])
   }
 
   it should "do list ser snapshot" in {
-    val set = implicitly[TypeSerializer[List[SimpleClass1]]]
-    roundtripSerializer(set)
-  }
+    roundtripSerializer(deriveSerializer[SimpleClassList])  }
 
   it should "do map ser snapshot adt " in {
-    val set = implicitly[TypeSerializer[Map[OuterTrait, String]]]
-    roundtripSerializer(set)
+    roundtripSerializer(deriveSerializer[TraitMap])
   }
 
   def roundtripSerializer[T](ser: TypeSerializer[T]) = {
@@ -63,6 +63,13 @@ object SerializerSnapshotTest {
   sealed trait OuterTrait
   case class SimpleClass1(a: String, b: Int) extends OuterTrait
   case class SimpleClass2(a: String, b: Long) extends OuterTrait
+
+  case class SimpleClassArray(a: Array[SimpleClass1])
+  case class SimpleClassMap1(a: Map[String, SimpleClass1])
+  case class SimpleClassMap2(a: Map[SimpleClass1, String])
+  case class SimpleClassList(a: List[SimpleClass1])
+
+  case class TraitMap(a: Map[OuterTrait, String])
 
   sealed trait ADT2
   case object Foo2 extends ADT2

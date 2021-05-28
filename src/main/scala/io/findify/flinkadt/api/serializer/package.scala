@@ -36,11 +36,12 @@ package object serializer {
     )
   }
 
-  private def loadClass(name: String):Option[Class[_]] = Try(Class.forName(name)) match {
-    case Failure(_) => Try(Class.forName(name + "$")) match {
-      case Failure(_) => None
-      case Success(value) => Some(value)
-    }
+  private def loadClass(name: String): Option[Class[_]] = Try(Class.forName(name)) match {
+    case Failure(_) =>
+      Try(Class.forName(name + "$")) match {
+        case Failure(_)     => None
+        case Success(value) => Some(value)
+      }
     case Success(value) => Some(value)
   }
   private def replaceLast(str: String, what: Char, dest: Char): Option[String] = {
@@ -52,15 +53,18 @@ package object serializer {
         Some(new String(arr))
     }
   }
-  @tailrec private def guessClass(name: String): Option[Class[_]]= {
+  @tailrec private def guessClass(name: String): Option[Class[_]] = {
     loadClass(name) match {
       case Some(value) => Some(value)
-      case None => replaceLast(name, '.', '$') match {
-        case None => None
-        case Some(next) => guessClass(next)
-      }
+      case None =>
+        replaceLast(name, '.', '$') match {
+          case None       => None
+          case Some(next) => guessClass(next)
+        }
     }
   }
 
-  implicit def deriveSerializer[T]: TypeSerializer[T] = macro Magnolia.gen[T]
+  implicit def deriveSerializer[T <: Product]: TypeSerializer[T] = macro Magnolia.gen[T]
+
+  def deriveADTSerializer[T]: TypeSerializer[T] = macro Magnolia.gen[T]
 }

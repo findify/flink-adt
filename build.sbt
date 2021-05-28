@@ -1,6 +1,6 @@
 name := "flink-adt"
 
-version := "0.3.0"
+version := "0.3.1"
 
 scalaVersion := "2.12.13"
 
@@ -18,7 +18,8 @@ libraryDependencies ++= Seq(
   "com.propensive"                   %% "magnolia"                   % "0.17.0",
   "org.apache.flink"          %% "flink-scala"                % flinkVersion % "provided",
   "org.apache.flink"          %% "flink-streaming-scala"      % flinkVersion % "provided",
-  "org.scalatest" %% "scalatest" % "3.0.9" % "test"
+  "org.apache.flink" %% "flink-test-utils"      % flinkVersion % "test",
+  "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 )
 
 scmInfo := Some(

@@ -19,6 +19,6 @@ package object typeinfo {
   ): TypeInformation[T] =
     new CoproductTypeInformation[T]()
 
-  implicit def deriveTypeInformation[T]: TypeInformation[T] = macro Magnolia.gen[T]
+  def deriveTypeInformation[T]: TypeInformation[T] = macro Magnolia.gen[T]
 
 }

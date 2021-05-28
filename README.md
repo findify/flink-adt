@@ -5,39 +5,53 @@ more Scala-specific TypeSerializer & TypeInformation derivation support.
 
 * can support ADTs (Algebraic data types, sealed trait hierarchies)
 * correctly handles `case object` 
-* can be extended with custom serializers even for deeply-nested types
-* has no fallback to Kryo
+* can be extended with custom serializers even for deeply-nested types, as it uses implicitly available serializers
+  in the current scope
+* has no silent fallback to Kryo: it will just fail the compilation in a case when serializer cannot be made
 * reuses all the low-level serialization code from Flink for basic Java and Scala types
 
-TODO:
-* moar testing.
-* not all Scala and Java types are supported out of the box yet.
-
 Issues:
-* as this project relies on macro to derive TypeSerializer instances, if you're using IntelliJ, it may
+* as this project relies on macro to derive TypeSerializer instances, if you're using IntelliJ 2020.*, it may
 highlight your code with red, hinting that it cannot find corresponding implicits. And this is fine, the code
-compiles OK.
-
+compiles OK. 2021 is fine with serializers derived with this library.
+* this library is built for Flink 1.13, but marks the `flink-*` dependencies as `provided`, so it should also work with earlier
+versions
+  
 ## Usage
 
 `flink-adt` is released to Maven-central. For SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.findify" %% "flink-adt" % "0.3.0"
+libraryDependencies += "io.findify" %% "flink-adt" % "0.3.1"
 ```
 
-To use the library, you need to change the way you import Flink's serialization support. 
+This library trades convenience of the original flink scala api to the explicitness and correctness, so you may need to
+add a couple of boilerplate lines to your code.
 
-So you should never do a wildcard import `import org.apache.flink.api.scala._`, but import 
-only specific required classes from the `api.scala` package. 
-And also add yet another set of imports:
+So to derive a TypeInformation for a sealed trait, you can do:
 ```scala
-  import io.findify.flinkadt.api.typeinfo._
-  import io.findify.flinkadt.api.serializer._
-  import io.findify.flinkadt.instances.all._
+import io.findify.flinkadt.api.typeinfo._
+import io.findify.flinkadt.api.serializer._
+import io.findify.flinkadt.instances.all._
+
+sealed trait Event
+case class Click(id: String) extends Event
+case class Purchase(price: Double) extends Event
+
+// first we derive the actual serializer used for IO tasks. The can automatically derive
+// serializers for all the case classes implementing the trait.
+implicit val eventSerializer = deriveADTSerializer[Event]
+// then we derive a wrapping TypeInformation class, which is required by all the flink api methods.
+implicit val eventTypeInfo = deriveTypeInformation[Event]
+
+// env is a StreamingExecutionEnvironment
+val result = env.fromCollection(List[Event](Click("1"), Purchase(1.0))).executeAndCollect(10)
+
 ```
 
-Then you can write your code as usual, so Flink will use the serialization support 
-from this library.
+Be careful with a wildcard import of `import org.apache.flink.api.scala._`: it has a `createTypeInformation` implicit
+function, which may happily generate you a kryo-based serializer in a place you never expected. So in a case if you want
+to do this type of wildcard import, make sure that you explicitly called `deriveADTSerializer` and `deriveTypeInformation`
+for all the sealed traits in the current scope.
 
 ## Licence
 
