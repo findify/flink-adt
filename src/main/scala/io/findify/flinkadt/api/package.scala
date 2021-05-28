@@ -1,26 +1,118 @@
-package io.findify.flinkadt.instances
+package io.findify.flinkadt
 
-import io.findify.flinkadt.instances.serializer.collection._
-import io.findify.flinkadt.instances.typeinfo.collection.{
-  ArrayTypeInformation,
-  ListTypeInformation,
-  MapTypeInformation,
-  SeqTypeInformation,
-  SetTypeInformation,
-  VectorTypeInformation
-}
+import io.findify.flinkadt.api.serializer._
+import io.findify.flinkadt.api.typeinfo.{CollectionTypeInformation, CoproductTypeInformation, ProductTypeInformation}
+import magnolia.{CaseClass, Magnolia, SealedTrait}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
-import org.apache.flink.api.common.typeutils.{TypeComparator, TypeSerializer}
-import org.apache.flink.api.common.typeutils.base.array._
-import org.apache.flink.api.scala.typeutils.{EitherSerializer, OptionSerializer, TraversableSerializer}
+import org.apache.flink.api.common.typeutils.TypeSerializer
+import org.apache.flink.api.common.typeutils.base.array.{
+  BooleanPrimitiveArraySerializer,
+  BytePrimitiveArraySerializer,
+  CharPrimitiveArraySerializer,
+  DoublePrimitiveArraySerializer,
+  FloatPrimitiveArraySerializer,
+  IntPrimitiveArraySerializer,
+  LongPrimitiveArraySerializer,
+  ShortPrimitiveArraySerializer,
+  StringArraySerializer
+}
 import org.apache.flink.api.scala.createTypeInformation
+import org.apache.flink.api.scala.typeutils.{EitherSerializer, OptionSerializer, ScalaCaseClassSerializer}
 
-import scala.reflect.{classTag, ClassTag}
+import scala.language.experimental.macros
+import scala.reflect.runtime.universe._
+import scala.annotation.tailrec
+import scala.collection.mutable
+import scala.reflect.{ClassTag, classTag}
+import scala.util.{Failure, Success, Try}
 
-object all {
+package object api extends LowPrioImplicits {
+  val config = new ExecutionConfig()
+  val cache  = mutable.Map[String, TypeInformation[_]]()
 
-  private val config = new ExecutionConfig()
+  type Typeclass[T] = TypeInformation[T]
+
+  def combine[T <: Product: ClassTag: TypeTag](
+      ctx: CaseClass[TypeInformation, T]
+  ): TypeInformation[T] = {
+    cache.get(ctx.typeName.full) match {
+      case Some(cached) => cached.asInstanceOf[TypeInformation[T]]
+      case None =>
+        val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
+        val serializer = typeOf[T].typeSymbol.isModuleClass match {
+          case true =>
+            new ScalaCaseObjectSerializer[T](clazz)
+          case false =>
+            new ScalaCaseClassSerializer[T](
+              clazz = clazz,
+              scalaFieldSerializers = ctx.parameters.map(_.typeclass.createSerializer(config)).toArray
+            )
+        }
+        val ti = new ProductTypeInformation[T](
+          c = clazz,
+          params = ctx.parameters,
+          ser = serializer
+        )
+        cache.put(ctx.typeName.full, ti)
+        ti
+    }
+  }
+
+  def dispatch[T: ClassTag](
+      ctx: SealedTrait[TypeInformation, T]
+  ): TypeInformation[T] = {
+    cache.get(ctx.typeName.full) match {
+      case Some(cached) => cached.asInstanceOf[TypeInformation[T]]
+      case None =>
+        val serializer = new CoproductSerializer[T](
+          subtypeClasses = ctx.subtypes
+            .map(_.typeName)
+            .map(c => {
+              guessClass(c.full).getOrElse(throw new ClassNotFoundException(c.full))
+            })
+            .toArray,
+          subtypeSerializers = ctx.subtypes.map(_.typeclass.createSerializer(config)).toArray
+        )
+        val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
+        val ti    = new CoproductTypeInformation[T](clazz, serializer)
+        cache.put(ctx.typeName.full, ti)
+        ti
+    }
+  }
+
+  private def loadClass(name: String): Option[Class[_]] = {
+    val sanitized = name.replaceAllLiterally("::", "$colon$colon")
+    Try(Class.forName(sanitized)) match {
+      case Failure(_) =>
+        Try(Class.forName(sanitized + "$")) match {
+          case Failure(_)     => None
+          case Success(value) => Some(value)
+        }
+      case Success(value) => Some(value)
+    }
+  }
+  private def replaceLast(str: String, what: Char, dest: Char): Option[String] = {
+    str.lastIndexOf(what) match {
+      case -1 => None
+      case pos =>
+        val arr = str.toCharArray
+        arr(pos) = dest
+        Some(new String(arr))
+    }
+  }
+  @tailrec private def guessClass(name: String): Option[Class[_]] = {
+    loadClass(name) match {
+      case Some(value) => Some(value)
+      case None =>
+        replaceLast(name, '.', '$') match {
+          case None       => None
+          case Some(next) => guessClass(next)
+        }
+    }
+  }
+
+  implicit def into2ser[T](implicit ti: TypeInformation[T]): TypeSerializer[T] = ti.createSerializer(config)
 
   implicit def optionSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Option[T]] =
     new OptionSerializer[T](vs)
@@ -100,40 +192,23 @@ object all {
   implicit lazy val jCharInfo: TypeInformation[java.lang.Character]  = BasicTypeInfo.CHAR_TYPE_INFO
   implicit lazy val jShortInfo: TypeInformation[java.lang.Short]     = BasicTypeInfo.SHORT_TYPE_INFO
 
-  implicit def listInfo[T: ClassTag: TypeInformation](implicit
-      ts: TypeSerializer[T],
-      ls: TypeSerializer[List[T]]
-  ): TypeInformation[List[T]] =
-    new ListTypeInformation[T]()
+  implicit def listInfo[T: ClassTag](implicit ls: TypeSerializer[List[T]]): TypeInformation[List[T]] =
+    new CollectionTypeInformation[List[T]](ls)
 
-  implicit def seqInfo[T: ClassTag: TypeInformation](implicit
-      ts: TypeSerializer[T],
-      ls: TypeSerializer[Seq[T]]
-  ): TypeInformation[Seq[T]] =
-    new SeqTypeInformation[T]()
+  implicit def seqInfo[T: ClassTag](implicit ls: TypeSerializer[Seq[T]]): TypeInformation[Seq[T]] =
+    new CollectionTypeInformation[Seq[T]](ls)
 
-  implicit def vectorInfo[T: ClassTag: TypeInformation](implicit
-      ts: TypeSerializer[T],
-      ls: TypeSerializer[Vector[T]]
-  ): TypeInformation[Vector[T]] =
-    new VectorTypeInformation[T]()
+  implicit def vectorInfo[T: ClassTag](implicit ls: TypeSerializer[Vector[T]]): TypeInformation[Vector[T]] =
+    new CollectionTypeInformation[Vector[T]](ls)
 
-  implicit def setInfo[T: ClassTag: TypeInformation](implicit
-      ts: TypeSerializer[T],
-      ls: TypeSerializer[Set[T]]
-  ): TypeInformation[Set[T]] =
-    new SetTypeInformation[T]()
+  implicit def setInfo[T: ClassTag](implicit ls: TypeSerializer[Set[T]]): TypeInformation[Set[T]] =
+    new CollectionTypeInformation[Set[T]](ls)
 
-  implicit def arrayInfo[T: ClassTag: TypeInformation](implicit
-      ts: TypeSerializer[T],
-      ls: TypeSerializer[Array[T]]
-  ): TypeInformation[Array[T]] =
-    new ArrayTypeInformation[T]()
+  implicit def arrayInfo[T: ClassTag](implicit ls: TypeSerializer[Array[T]]): TypeInformation[Array[T]] =
+    new CollectionTypeInformation[Array[T]](ls)
 
-  implicit def mapInfo[K: ClassTag: TypeInformation, V: ClassTag: TypeInformation](implicit
-      ks: TypeSerializer[K],
-      vs: TypeSerializer[V],
+  implicit def mapInfo[K: ClassTag, V: ClassTag](implicit
       ms: TypeSerializer[Map[K, V]]
   ): TypeInformation[Map[K, V]] =
-    new MapTypeInformation[K, V]()
+    new CollectionTypeInformation[Map[K, V]](ms)
 }

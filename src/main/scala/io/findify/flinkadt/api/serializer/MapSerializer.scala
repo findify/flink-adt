@@ -1,17 +1,9 @@
-package io.findify.flinkadt.instances.serializer.collection
+package io.findify.flinkadt.api.serializer
 
-import io.findify.flinkadt.api.serializer.SimpleSerializer
-import io.findify.flinkadt.instances.serializer.collection.MapSerializer.MapSerializerSnapshot
-import org.apache.flink.api.common.typeutils.{
-  SimpleTypeSerializerSnapshot,
-  TypeSerializer,
-  TypeSerializerSchemaCompatibility,
-  TypeSerializerSnapshot
-}
+import org.apache.flink.api.common.typeutils.{TypeSerializer, TypeSerializerSchemaCompatibility, TypeSerializerSnapshot}
 import org.apache.flink.core.memory.{DataInputView, DataOutputView}
 import org.apache.flink.util.InstantiationUtil
-
-import scala.reflect.ClassTag
+import io.findify.flinkadt.api.serializer.MapSerializer._
 
 class MapSerializer[K, V](ks: TypeSerializer[K], vs: TypeSerializer[V]) extends SimpleSerializer[Map[K, V]] {
   override def createInstance(): Map[K, V] = Map.empty[K, V]

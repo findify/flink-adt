@@ -3,8 +3,27 @@ package io.findify.flinkadt
 import io.findify.flinkadt.SerializerTest.DeeplyNested.ModeNested.SuperNested.{Egg, Food}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectOutputStream}
-import io.findify.flinkadt.SerializerTest.{ADT, ADT2, Ann, Annotated, Bar, Bar2, Foo, Foo2, Nested, Simple, SimpleJava, SimpleSeq, SimpleSeqSeq, WrappedADT}
-import io.findify.flinkadt.api.serializer.deriveADTSerializer
+import io.findify.flinkadt.SerializerTest.{
+  ADT,
+  ADT2,
+  Ann,
+  Annotated,
+  Bar,
+  Bar2,
+  Foo,
+  Foo2,
+  Nested,
+  Node,
+  P2,
+  Param,
+  Simple,
+  SimpleJava,
+  SimpleList,
+  SimpleSeq,
+  SimpleSeqSeq,
+  WrappedADT
+}
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
 import org.apache.flink.api.scala.typeutils.ScalaCaseClassSerializer
@@ -12,79 +31,93 @@ import org.apache.flink.core.memory.{DataInputViewStreamWrapper, DataOutputViewS
 import org.scalatest.Inspectors
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import io.findify.flinkadt.api._
 
 class SerializerTest extends AnyFlatSpec with Matchers with Inspectors {
-  import io.findify.flinkadt.api.serializer.deriveSerializer
-  import io.findify.flinkadt.instances.all._
-
-  implicit val simple = deriveSerializer[Simple]
-  implicit val simpleJava = deriveSerializer[SimpleJava]
+  import io.findify.flinkadt.api._
 
   it should "derive serializer for simple class" in {
-    val ser = deriveSerializer[Simple]
+    val ser = implicitly[TypeInformation[Simple]].createSerializer(null)
     all(ser, Simple(1, "foo"))
   }
 
   it should "derive serializer for java classes" in {
-    val ser = deriveSerializer[SimpleJava]
+    val ser = implicitly[TypeInformation[SimpleJava]].createSerializer(null)
     all(ser, SimpleJava(1, "foo"))
   }
 
   it should "derive nested classes" in {
-    val ser = deriveSerializer[Nested]
+    val ser = implicitly[TypeInformation[Nested]].createSerializer(null)
     all(ser, Nested(Simple(1, "foo")))
   }
 
   it should "derive for ADTs" in {
-    implicit val s1 = deriveSerializer[Foo]
-    implicit val s2 = deriveSerializer[Bar]
-    val ser = deriveADTSerializer[ADT]
+    val ser = implicitly[TypeInformation[ADT]].createSerializer(null)
     all(ser, Foo("a"))
     all(ser, Bar(1))
   }
 
   it should "derive for ADTs with case objects" in {
-    val ser = deriveADTSerializer[ADT2]
+    val ser = implicitly[TypeInformation[ADT2]].createSerializer(null)
     all(ser, Foo2)
     all(ser, Bar2)
   }
 
   it should "derive for deeply nested classes" in {
-    val ser = deriveSerializer[Egg]
+    val ser = implicitly[TypeInformation[Egg]].createSerializer(null)
     all(ser, Egg(1))
   }
 
   it should "derive for deeply nested adts" in {
-    val ser = deriveADTSerializer[Food]
+    val ser = implicitly[TypeInformation[Food]].createSerializer(null)
     all(ser, Egg(1))
   }
 
   it should "derive for nested ADTs" in {
-    implicit val ser1 = deriveADTSerializer[ADT]
-    val ser = deriveSerializer[WrappedADT]
+    val ser = implicitly[TypeInformation[WrappedADT]].createSerializer(null)
     all(ser, WrappedADT(Foo("a")))
     all(ser, WrappedADT(Bar(1)))
   }
 
+  it should "derive for generic ADTs" in {
+    val ser = implicitly[TypeInformation[Param[Int]]].createSerializer(null)
+    all(ser, P2(1))
+  }
+
   it should "derive seq" in {
-    val ser = deriveSerializer[SimpleSeq]
+    val ser = implicitly[TypeInformation[SimpleSeq]].createSerializer(null)
     noKryo(ser)
     serializable(ser)
   }
 
+  it should "derive recursively" in {
+    // recursive is broken
+    //val ti = implicitly[TypeInformation[Node]]
+  }
+
+  it should "derive list" in {
+    val ser = implicitly[TypeInformation[List[Simple]]].createSerializer(null)
+    all(ser, List(Simple(1, "a")))
+  }
+
+  it should "derive nested list" in {
+    val ser = implicitly[TypeInformation[List[SimpleList]]].createSerializer(null)
+    all(ser, List(SimpleList(List(1))))
+  }
+
   it should "derive seq of seq" in {
-    val ser = deriveSerializer[SimpleSeqSeq]
+    val ser = implicitly[TypeInformation[SimpleSeqSeq]].createSerializer(null)
     noKryo(ser)
     serializable(ser)
   }
 
   it should "be serializable in case of annotations on classes" in {
-    val ser = deriveSerializer[Annotated]
+    val ser = implicitly[TypeInformation[Annotated]].createSerializer(null)
     serializable(ser)
   }
 
   it should "be serializable in case of annotations on subtypes" in {
-    val ser = deriveADTSerializer[Ann]
+    val ser = implicitly[TypeInformation[Ann]].createSerializer(null)
     serializable(ser)
   }
 
@@ -121,6 +154,7 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors {
 
 object SerializerTest {
   case class Simple(a: Int, b: String)
+  case class SimpleList(a: List[Int])
   case class SimpleJava(a: Integer, b: String)
   case class Nested(a: Simple)
 
@@ -129,7 +163,7 @@ object SerializerTest {
 
   sealed trait ADT
   case class Foo(a: String) extends ADT
-  case class Bar(b: Int) extends ADT
+  case class Bar(b: Int)    extends ADT
 
   sealed trait ADT2
   case object Foo2 extends ADT2
@@ -149,8 +183,16 @@ object SerializerTest {
       object SuperNested {
         sealed trait Food
         case class Egg(i: Int) extends Food
-        case object Ham extends Food
+        case object Ham        extends Food
       }
     }
   }
+
+  sealed trait Param[T] {
+    def a: T
+  }
+  case class P1(a: String) extends Param[String]
+  case class P2(a: Int)    extends Param[Int]
+
+  case class Node(left: Option[Node], right: Option[Node])
 }

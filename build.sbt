@@ -1,6 +1,6 @@
 name := "flink-adt"
 
-version := "0.3.1"
+version := "0.4.0-M3"
 
 scalaVersion := "2.12.13"
 
@@ -15,11 +15,12 @@ publishTo := sonatypePublishToBundle.value
 lazy val flinkVersion = "1.13.0"
 
 libraryDependencies ++= Seq(
-  "com.propensive"                   %% "magnolia"                   % "0.17.0",
-  "org.apache.flink"          %% "flink-scala"                % flinkVersion % "provided",
-  "org.apache.flink"          %% "flink-streaming-scala"      % flinkVersion % "provided",
+  "com.propensive"   %% "magnolia"              % "0.17.0",
+  "org.apache.flink" %% "flink-scala"           % flinkVersion % "provided",
+  "org.apache.flink" %% "flink-streaming-scala" % flinkVersion % "provided",
   "org.apache.flink" %% "flink-test-utils"      % flinkVersion % "test",
-  "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+  "org.scalatest"    %% "scalatest"             % "3.2.9"      % "test",
+  "com.chuusai"      %% "shapeless"             % "2.3.7"
 )
 
 scmInfo := Some(
@@ -31,3 +32,5 @@ scmInfo := Some(
 developers := List(
   Developer(id = "romangrebennikov", name = "Roman Grebennikov", email = "grv@dfdx.me", url = url("https://dfdx.me/"))
 )
+
+publishLocalConfiguration / publishMavenStyle := true

@@ -38,12 +38,8 @@ class ExampleTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
   }
 
   it should "run example code" in {
-    import io.findify.flinkadt.api.typeinfo._
-    import io.findify.flinkadt.api.serializer._
-    import io.findify.flinkadt.instances.all._
+    import io.findify.flinkadt.api._
 
-
-    implicit val eventSerializer = deriveADTSerializer[Event]
     implicit val eventTypeInfo = deriveTypeInformation[Event]
 
     val result = env.fromCollection(List[Event](Click("1"), Purchase(1.0))).executeAndCollect(10)
@@ -51,12 +47,9 @@ class ExampleTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
   }
 
   it should "not clash with scala.api._" in {
-    import io.findify.flinkadt.api.typeinfo._
-    import io.findify.flinkadt.api.serializer._
-    import io.findify.flinkadt.instances.all._
+    import io.findify.flinkadt.api._
     import org.apache.flink.api.scala._
 
-    implicit val eventSerializer = deriveADTSerializer[Event]
     implicit val eventTypeInfo = deriveTypeInformation[Event]
 
     val result = env.fromCollection(List[Event](Click("1"), Purchase(1.0))).executeAndCollect(10)
@@ -66,7 +59,7 @@ class ExampleTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
 
 object ExampleTest {
   sealed trait Event
-  case class Click(id: String) extends Event
+  case class Click(id: String)       extends Event
   case class Purchase(price: Double) extends Event
 
 }

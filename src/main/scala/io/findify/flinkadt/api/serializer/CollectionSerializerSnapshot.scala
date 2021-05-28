@@ -1,10 +1,8 @@
-package io.findify.flinkadt.instances.serializer.collection
+package io.findify.flinkadt.api.serializer
 
 import org.apache.flink.api.common.typeutils.{TypeSerializer, TypeSerializerSchemaCompatibility, TypeSerializerSnapshot}
 import org.apache.flink.core.memory.{DataInputView, DataOutputView}
 import org.apache.flink.util.InstantiationUtil
-
-import scala.reflect.{classTag, ClassTag}
 
 class CollectionSerializerSnapshot[F[_], T, S <: TypeSerializer[F[T]]]() extends TypeSerializerSnapshot[F[T]] {
 

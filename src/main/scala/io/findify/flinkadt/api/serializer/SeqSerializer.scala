@@ -1,10 +1,7 @@
-package io.findify.flinkadt.instances.serializer.collection
+package io.findify.flinkadt.api.serializer
 
-import io.findify.flinkadt.api.serializer.SimpleSerializer
-import org.apache.flink.api.common.typeutils.{SimpleTypeSerializerSnapshot, TypeSerializer, TypeSerializerSnapshot}
+import org.apache.flink.api.common.typeutils.{TypeSerializer, TypeSerializerSnapshot}
 import org.apache.flink.core.memory.{DataInputView, DataOutputView}
-
-import scala.reflect.ClassTag
 
 class SeqSerializer[T](child: TypeSerializer[T], clazz: Class[T]) extends SimpleSerializer[Seq[T]] {
   override def createInstance(): Seq[T] = Seq.empty[T]
