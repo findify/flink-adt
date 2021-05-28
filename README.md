@@ -1,5 +1,9 @@
 # Scala ADT support for Apache Flink
 
+[![CI Status](https://github.com/findify/flink-adt/workflows/CI/badge.svg)](https://github.com/metarank/cfor/actions)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.findify/flink-adt_2.12/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.github.metarank/cfor_2.13)
+[![License: Apache 2](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 This is a prototype of Magnolia-based serializer framework for Apache Flink, with
 more Scala-specific TypeSerializer & TypeInformation derivation support.
 
