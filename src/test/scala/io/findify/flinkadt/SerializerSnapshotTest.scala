@@ -52,7 +52,7 @@ class SerializerSnapshotTest extends AnyFlatSpec with Matchers {
     snap.writeSnapshot(output)
     output.close()
     val input = new DataInputViewStreamWrapper(new ByteArrayInputStream(buffer.toByteArray))
-    snap.readSnapshot(ser.snapshotConfiguration().getCurrentVersion, input, ClassLoader.getSystemClassLoader)
+    snap.readSnapshot(ser.snapshotConfiguration().getCurrentVersion, input, getClass.getClassLoader)
     val restored = snap.restoreSerializer()
     ser shouldBe restored
   }

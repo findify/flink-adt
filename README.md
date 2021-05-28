@@ -20,6 +20,7 @@ highlight your code with red, hinting that it cannot find corresponding implicit
 compiles OK. 2021 is fine with serializers derived with this library.
 * this library is built for Flink 1.13, but marks the `flink-*` dependencies as `provided`, so it should also work with earlier
 versions
+* Supports only Scala 2.12: underlying Magnolia library has no support for 2.11
   
 ## Usage
 
