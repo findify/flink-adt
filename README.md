@@ -53,6 +53,17 @@ function, which may happily generate you a kryo-based serializer in a place you 
 to do this type of wildcard import, make sure that you explicitly called `deriveADTSerializer` and `deriveTypeInformation`
 for all the sealed traits in the current scope.
 
+## Schema evolution
+
+For the child case classes being part of ADT, `flink-adt` uses a Flink's `ScalaCaseClassSerializer`, so all the compatibility rules
+are the same as for normal case classes.
+
+For the sealed trait membership itself, `flink-adt` used an own serialization format with the following rules:
+* you cannot reorder trait members, as wire format depends on the compile-time index of each member
+* you can add new members at the end of the list
+* you cannot remove ADT members
+* you cannot replace ADT members
+
 ## Licence
 
 The MIT License (MIT)
