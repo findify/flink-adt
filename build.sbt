@@ -1,8 +1,8 @@
 name := "flink-adt"
 
-version := "0.4.1"
+version := "0.4.2"
 
-scalaVersion := "2.12.13"
+scalaVersion := "2.12.14"
 
 organization := "io.findify"
 licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
@@ -12,7 +12,7 @@ publishMavenStyle := true
 
 publishTo := sonatypePublishToBundle.value
 
-lazy val flinkVersion = "1.13.0"
+lazy val flinkVersion = "1.13.1"
 
 libraryDependencies ++= Seq(
   "com.propensive"   %% "magnolia"              % "0.17.0",

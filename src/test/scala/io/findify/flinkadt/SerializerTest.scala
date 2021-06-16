@@ -12,6 +12,7 @@ import io.findify.flinkadt.SerializerTest.{
   Bar2,
   Foo,
   Foo2,
+  ListADT,
   Nested,
   Node,
   P2,
@@ -91,6 +92,13 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors {
     serializable(ser)
   }
 
+  it should "derive list of ADT" in {
+    val ser = implicitly[TypeInformation[List[ADT]]].createSerializer(null)
+    all(ser, List(Foo("a")))
+    roundtrip(ser, ::(Foo("a"), Nil))
+    roundtrip(ser, Nil)
+  }
+
   it should "derive recursively" in {
     // recursive is broken
     //val ti = implicitly[TypeInformation[Node]]
@@ -126,6 +134,12 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors {
     val ser = implicitly[TypeInformation[SimpleOption]].createSerializer(null)
     all(ser, SimpleOption(None))
     roundtrip(ser, SimpleOption(Some("foo")))
+  }
+
+  it should "serialize nested list of ADT" in {
+    val ser = implicitly[TypeInformation[ListADT]].createSerializer(null)
+    all(ser, ListADT(Nil))
+    roundtrip(ser, ListADT(List(Foo("a"))))
   }
 
   def roundtrip[T](ser: TypeSerializer[T], in: T) = {
@@ -204,4 +218,6 @@ object SerializerTest {
   case class Node(left: Option[Node], right: Option[Node])
 
   case class SimpleOption(a: Option[String])
+
+  case class ListADT(a: List[ADT])
 }

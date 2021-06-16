@@ -124,6 +124,9 @@ package object api extends LowPrioImplicits {
     new OptionSerializer[T](vs)
   implicit def listSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[List[T]] =
     new ListSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
+  implicit def listCCSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[::[T]] =
+    new ListCCSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
+
   implicit def vectorSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Vector[T]] =
     new VectorSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
   implicit def arraySerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Array[T]] =
@@ -197,6 +200,9 @@ package object api extends LowPrioImplicits {
   implicit lazy val jByteInfo: TypeInformation[java.lang.Byte]       = BasicTypeInfo.BYTE_TYPE_INFO
   implicit lazy val jCharInfo: TypeInformation[java.lang.Character]  = BasicTypeInfo.CHAR_TYPE_INFO
   implicit lazy val jShortInfo: TypeInformation[java.lang.Short]     = BasicTypeInfo.SHORT_TYPE_INFO
+
+  implicit def listCCInfo[T: ClassTag](implicit ls: TypeSerializer[::[T]]): TypeInformation[::[T]] =
+    new CollectionTypeInformation[::[T]](ls)
 
   implicit def listInfo[T: ClassTag](implicit ls: TypeSerializer[List[T]]): TypeInformation[List[T]] =
     new CollectionTypeInformation[List[T]](ls)
