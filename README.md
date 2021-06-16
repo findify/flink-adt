@@ -26,7 +26,7 @@ versions
 
 `flink-adt` is released to Maven-central. For SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.findify" %% "flink-adt" % "0.4.0"
+libraryDependencies += "io.findify" %% "flink-adt" % "0.4.1"
 ```
 
 To use this library, swap `import org.apache.flink.api.scala._` with `import io.findify.flinkadt.api._` and enjoy.
