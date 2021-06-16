@@ -60,6 +60,11 @@ For the sealed trait membership itself, `flink-adt` used an own serialization fo
 * you cannot remove ADT members
 * you cannot replace ADT members
 
+## Compatibility
+
+This project uses a separate set of serializers for collections, instead of Flink's own TraversableSerializer. So probably you
+may have issues while migrating state snapshots from TraversableSerializer to FlinkADT ones.
+
 ## Licence
 
 The MIT License (MIT)
