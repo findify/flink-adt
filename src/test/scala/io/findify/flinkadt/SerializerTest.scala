@@ -19,6 +19,7 @@ import io.findify.flinkadt.SerializerTest.{
   Simple,
   SimpleJava,
   SimpleList,
+  SimpleOption,
   SimpleSeq,
   SimpleSeqSeq,
   WrappedADT
@@ -121,6 +122,12 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors {
     serializable(ser)
   }
 
+  it should "serialize Option" in {
+    val ser = implicitly[TypeInformation[SimpleOption]].createSerializer(null)
+    all(ser, SimpleOption(None))
+    roundtrip(ser, SimpleOption(Some("foo")))
+  }
+
   def roundtrip[T](ser: TypeSerializer[T], in: T) = {
     val out = new ByteArrayOutputStream()
     ser.serialize(in, new DataOutputViewStreamWrapper(out))
@@ -195,4 +202,6 @@ object SerializerTest {
   case class P2(a: Int)    extends Param[Int]
 
   case class Node(left: Option[Node], right: Option[Node])
+
+  case class SimpleOption(a: Option[String])
 }

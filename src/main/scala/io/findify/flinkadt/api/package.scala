@@ -18,7 +18,13 @@ import org.apache.flink.api.common.typeutils.base.array.{
   StringArraySerializer
 }
 import org.apache.flink.api.scala.createTypeInformation
-import org.apache.flink.api.scala.typeutils.{EitherSerializer, OptionSerializer, ScalaCaseClassSerializer}
+import org.apache.flink.api.scala.typeutils.{
+  EitherSerializer,
+  NothingSerializer,
+  OptionSerializer,
+  OptionTypeInfo,
+  ScalaCaseClassSerializer
+}
 
 import scala.language.experimental.macros
 import scala.reflect.runtime.universe._
@@ -211,4 +217,7 @@ package object api extends LowPrioImplicits {
       ms: TypeSerializer[Map[K, V]]
   ): TypeInformation[Map[K, V]] =
     new CollectionTypeInformation[Map[K, V]](ms)
+
+  implicit def optionInfo[T](implicit ls: TypeInformation[T]): TypeInformation[Option[T]] =
+    new OptionTypeInfo[T, Option[T]](ls)
 }
