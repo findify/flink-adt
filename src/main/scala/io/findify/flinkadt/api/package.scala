@@ -42,7 +42,8 @@ package object api extends LowPrioImplicits {
   def combine[T <: Product: ClassTag: TypeTag](
       ctx: CaseClass[TypeInformation, T]
   ): TypeInformation[T] = {
-    cache.get(ctx.typeName.full) match {
+    val cacheKey = s"${ctx.typeName.full}_${ctx.typeName.typeArguments}"
+    cache.get(cacheKey) match {
       case Some(cached) => cached.asInstanceOf[TypeInformation[T]]
       case None =>
         val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
@@ -60,7 +61,7 @@ package object api extends LowPrioImplicits {
           params = ctx.parameters,
           ser = serializer
         )
-        cache.put(ctx.typeName.full, ti)
+        cache.put(cacheKey, ti)
         ti
     }
   }
