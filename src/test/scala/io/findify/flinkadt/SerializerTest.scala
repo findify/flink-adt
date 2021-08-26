@@ -10,11 +10,13 @@ import io.findify.flinkadt.SerializerTest.{
   Annotated,
   Bar,
   Bar2,
+  BoundADT,
   Foo,
   Foo2,
   Generic,
   ListADT,
   Nested,
+  NestedParent,
   Node,
   P2,
   Param,
@@ -36,7 +38,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.findify.flinkadt.api._
 
-class SerializerTest extends AnyFlatSpec with Matchers with Inspectors {
+class SerializerTest extends AnyFlatSpec with Matchers with Inspectors with TestUtils {
   import io.findify.flinkadt.api._
 
   it should "derive serializer for simple class" in {
@@ -121,6 +123,16 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors {
     serializable(ser)
   }
 
+  it should "derive generic type bounded classes" in {
+    val ser = implicitly[TypeInformation[BoundADT[Foo]]].createSerializer(null)
+    noKryo(ser)
+  }
+
+//  it should "derive nested generic type bounded classes" in {
+//    val ser = deriveTypeInformation[NestedParent].createSerializer(null)
+//    noKryo(ser)
+//  }
+
   it should "be serializable in case of annotations on classes" in {
     val ser = implicitly[TypeInformation[Annotated]].createSerializer(null)
     serializable(ser)
@@ -150,35 +162,6 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors {
     all(ser2, Generic(Simple(0, "asd"), Bar(0)))
   }
 
-  def roundtrip[T](ser: TypeSerializer[T], in: T) = {
-    val out = new ByteArrayOutputStream()
-    ser.serialize(in, new DataOutputViewStreamWrapper(out))
-    val copy = ser.deserialize(new DataInputViewStreamWrapper(new ByteArrayInputStream(out.toByteArray)))
-    in shouldBe copy
-  }
-
-  def noKryo[T](ser: TypeSerializer[T]): Unit =
-    ser match {
-      case p: ScalaCaseClassSerializer[_] =>
-        forAll(p.getFieldSerializers) { param =>
-          noKryo(param)
-        }
-      case _: KryoSerializer[_] =>
-        throw new IllegalArgumentException("kryo detected")
-      case _ => // ok
-    }
-
-  def serializable[T](ser: TypeSerializer[T]) = {
-    val stream = new ObjectOutputStream(new ByteArrayOutputStream())
-    stream.writeObject(ser)
-  }
-
-  def all[T](ser: TypeSerializer[T], in: T) = {
-    roundtrip(ser, in)
-    noKryo(ser)
-    serializable(ser)
-  }
-
 }
 
 object SerializerTest {
@@ -199,6 +182,11 @@ object SerializerTest {
   case object Bar2 extends ADT2
 
   case class WrappedADT(x: ADT)
+
+  case class BoundADT[T <: ADT](x: T)
+
+  sealed trait NestedParent
+  case class NestedBoundADT[T <: ADT](x: T) extends NestedParent
 
   @SerialVersionUID(1L)
   case class Annotated(foo: String)

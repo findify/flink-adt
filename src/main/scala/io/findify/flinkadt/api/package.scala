@@ -42,7 +42,7 @@ package object api extends LowPrioImplicits {
   def combine[T <: Product: ClassTag: TypeTag](
       ctx: CaseClass[TypeInformation, T]
   ): TypeInformation[T] = {
-    val cacheKey = s"${ctx.typeName.full}_${ctx.typeName.typeArguments}"
+    val cacheKey = typeName(ctx.typeName)
     cache.get(cacheKey) match {
       case Some(cached) => cached.asInstanceOf[TypeInformation[T]]
       case None =>
@@ -69,7 +69,8 @@ package object api extends LowPrioImplicits {
   def dispatch[T: ClassTag](
       ctx: SealedTrait[TypeInformation, T]
   ): TypeInformation[T] = {
-    cache.get(ctx.typeName.full) match {
+    val cacheKey = typeName(ctx.typeName)
+    cache.get(cacheKey) match {
       case Some(cached) => cached.asInstanceOf[TypeInformation[T]]
       case None =>
         val serializer = new CoproductSerializer[T](
@@ -83,9 +84,13 @@ package object api extends LowPrioImplicits {
         )
         val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
         val ti    = new CoproductTypeInformation[T](clazz, serializer)
-        cache.put(ctx.typeName.full, ti)
+        cache.put(cacheKey, ti)
         ti
     }
+  }
+
+  private def typeName(tn: magnolia.TypeName): String = {
+    s"${tn.full}[${tn.typeArguments.map(typeName).mkString(",")}]"
   }
 
   private def loadClass(name: String): Option[Class[_]] = {
