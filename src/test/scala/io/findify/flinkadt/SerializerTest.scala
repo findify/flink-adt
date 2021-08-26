@@ -12,6 +12,7 @@ import io.findify.flinkadt.SerializerTest.{
   Bar2,
   Foo,
   Foo2,
+  Generic,
   ListADT,
   Nested,
   Node,
@@ -142,6 +143,13 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors {
     roundtrip(ser, ListADT(List(Foo("a"))))
   }
 
+  it should "derive multiple instances of generic class" in {
+    val ser  = implicitly[TypeInformation[Generic[SimpleOption]]].createSerializer(null)
+    val ser2 = implicitly[TypeInformation[Generic[Simple]]].createSerializer(null)
+    all(ser, Generic(SimpleOption(None), Bar(0)))
+    all(ser2, Generic(Simple(0, "asd"), Bar(0)))
+  }
+
   def roundtrip[T](ser: TypeSerializer[T], in: T) = {
     val out = new ByteArrayOutputStream()
     ser.serialize(in, new DataOutputViewStreamWrapper(out))
@@ -218,6 +226,8 @@ object SerializerTest {
   case class Node(left: Option[Node], right: Option[Node])
 
   case class SimpleOption(a: Option[String])
+
+  case class Generic[T](a: T, b: ADT)
 
   case class ListADT(a: List[ADT])
 }
