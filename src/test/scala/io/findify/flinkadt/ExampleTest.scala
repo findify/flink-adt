@@ -41,8 +41,7 @@ class ExampleTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
     import io.findify.flinkadt.api._
 
     implicit val eventTypeInfo = deriveTypeInformation[Event]
-
-    val result = env.fromCollection(List[Event](Click("1"), Purchase(1.0))).executeAndCollect(10)
+    val result                 = env.fromCollection(List[Event](Click("1"), Purchase(1.0))).executeAndCollect(10)
     result.size shouldBe 2
   }
 
