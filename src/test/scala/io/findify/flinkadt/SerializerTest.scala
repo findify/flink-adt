@@ -1,6 +1,8 @@
 package io.findify.flinkadt
 
+import cats.data.NonEmptyList
 import io.findify.flinkadt.SerializerTest.DeeplyNested.ModeNested.SuperNested.{Egg, Food}
+import io.findify.flinkadt.SerializerTest.NestedRoot.NestedMiddle.NestedBottom
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectOutputStream}
 import io.findify.flinkadt.SerializerTest.{
@@ -162,6 +164,16 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors with Test
     all(ser2, Generic(Simple(0, "asd"), Bar(0)))
   }
 
+  it should "serialize nil" in {
+    val ser = implicitly[TypeInformation[NonEmptyList[String]]].createSerializer(null)
+    roundtrip(ser, NonEmptyList.one("a"))
+  }
+
+  it should "serialize triple-nested case clases" in {
+    val ser = implicitly[TypeInformation[Seq[NestedBottom]]].createSerializer(null)
+    roundtrip(ser, List(NestedBottom(Some("a"), None)))
+  }
+
 }
 
 object SerializerTest {
@@ -218,4 +230,10 @@ object SerializerTest {
   case class Generic[T](a: T, b: ADT)
 
   case class ListADT(a: List[ADT])
+
+  object NestedRoot {
+    object NestedMiddle {
+      case class NestedBottom(a: Option[String], b: Option[String])
+    }
+  }
 }

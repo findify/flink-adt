@@ -1,6 +1,6 @@
 package io.findify.flinkadt.api.typeinfo
 
-import magnolia.{CaseClass, Param}
+import magnolia1.{CaseClass, Param}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.TypeSerializer

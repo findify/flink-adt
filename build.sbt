@@ -1,8 +1,8 @@
 name := "flink-adt"
 
-version := "0.4.3"
+version := "0.4.4"
 
-scalaVersion := "2.12.14"
+scalaVersion := "2.12.15"
 
 organization := "io.findify"
 licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
@@ -12,15 +12,15 @@ publishMavenStyle := true
 
 publishTo := sonatypePublishToBundle.value
 
-lazy val flinkVersion = "1.13.1"
+lazy val flinkVersion = "1.13.2"
 
 libraryDependencies ++= Seq(
-  "com.propensive"   %% "magnolia"              % "0.17.0",
-  "org.apache.flink" %% "flink-scala"           % flinkVersion % "provided",
-  "org.apache.flink" %% "flink-streaming-scala" % flinkVersion % "provided",
-  "org.apache.flink" %% "flink-test-utils"      % flinkVersion % "test",
-  "org.scalatest"    %% "scalatest"             % "3.2.9"      % "test",
-  "org.typelevel"    %% "cats-core"             % "2.3.0"      % "test"
+  "com.softwaremill.magnolia1_2" % "magnolia_2.12"         % "1.0.0-M5",
+  "org.apache.flink"            %% "flink-scala"           % flinkVersion % "provided",
+  "org.apache.flink"            %% "flink-streaming-scala" % flinkVersion % "provided",
+  "org.apache.flink"            %% "flink-test-utils"      % flinkVersion % "test",
+  "org.scalatest"               %% "scalatest"             % "3.2.10"     % "test",
+  "org.typelevel"               %% "cats-core"             % "2.6.1"      % "test"
 )
 
 scmInfo := Some(

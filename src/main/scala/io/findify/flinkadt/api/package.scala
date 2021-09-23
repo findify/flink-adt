@@ -2,7 +2,7 @@ package io.findify.flinkadt
 
 import io.findify.flinkadt.api.serializer._
 import io.findify.flinkadt.api.typeinfo.{CollectionTypeInformation, CoproductTypeInformation, ProductTypeInformation}
-import magnolia.{CaseClass, Magnolia, SealedTrait}
+import magnolia1.{CaseClass, Magnolia, SealedTrait}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.api.common.typeutils.TypeSerializer
@@ -89,7 +89,7 @@ package object api extends LowPrioImplicits {
     }
   }
 
-  private def typeName(tn: magnolia.TypeName): String = {
+  private def typeName(tn: magnolia1.TypeName): String = {
     s"${tn.full}[${tn.typeArguments.map(typeName).mkString(",")}]"
   }
 
