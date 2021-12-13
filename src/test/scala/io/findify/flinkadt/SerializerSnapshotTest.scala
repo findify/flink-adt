@@ -16,6 +16,7 @@ import org.apache.flink.core.memory.{DataInputViewStreamWrapper, DataOutputViewS
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.findify.flinkadt.api._
+import org.apache.flink.api.common.typeinfo.TypeInformation
 
 class SerializerSnapshotTest extends AnyFlatSpec with Matchers {
 
@@ -31,6 +32,16 @@ class SerializerSnapshotTest extends AnyFlatSpec with Matchers {
 
   it should "roundtrip coproduct serializer snapshot with singletons" in {
     val ser = deriveTypeInformation[ADT2].createSerializer(null)
+    roundtripSerializer(ser)
+  }
+
+  it should "roundtrip serializer snapshot with list of primitives" in {
+    val ser = deriveTypeInformation[List[Double]].createSerializer(null)
+    roundtripSerializer(ser)
+  }
+
+  it should "roundtrip serializer snapshot with set as array of primitives" in {
+    val ser = implicitly[TypeInformation[Set[Double]]].createSerializer(null)
     roundtripSerializer(ser)
   }
 

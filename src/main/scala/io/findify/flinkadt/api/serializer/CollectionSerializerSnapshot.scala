@@ -29,7 +29,18 @@ class CollectionSerializerSnapshot[F[_], T, S <: TypeSerializer[F[T]]]() extends
 
   override def writeSnapshot(out: DataOutputView): Unit = {
     out.writeUTF(clazz.getName)
-    out.writeUTF(vclazz.getName)
+    vclazz.getName match {
+      case "double"  => out.writeUTF("java.lang.Double")
+      case "float"   => out.writeUTF("java.lang.Float")
+      case "int"     => out.writeUTF("java.lang.Integer")
+      case "long"    => out.writeUTF("java.lang.Long")
+      case "byte"    => out.writeUTF("java.lang.Byte")
+      case "short"   => out.writeUTF("java.lang.Short")
+      case "char"    => out.writeUTF("java.lang.Char")
+      case "boolean" => out.writeUTF("java.lang.Boolean")
+      case other     => out.writeUTF(other)
+    }
+
     out.writeUTF(nestedSerializer.snapshotConfiguration().getClass.getName)
     nestedSerializer.snapshotConfiguration().writeSnapshot(out)
   }
