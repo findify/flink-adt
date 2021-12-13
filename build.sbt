@@ -1,6 +1,6 @@
 name := "flink-adt"
 
-version := "0.4.4"
+version := "0.4.5"
 
 scalaVersion := "2.12.15"
 
@@ -12,15 +12,15 @@ publishMavenStyle := true
 
 publishTo := sonatypePublishToBundle.value
 
-lazy val flinkVersion = "1.13.2"
+lazy val flinkVersion = "1.14.0"
 
 libraryDependencies ++= Seq(
-  "com.softwaremill.magnolia1_2" % "magnolia_2.12"         % "1.0.0-M5",
+  "com.softwaremill.magnolia1_2" % "magnolia_2.12"         % "1.0.0-M7",
   "org.apache.flink"            %% "flink-scala"           % flinkVersion % "provided",
   "org.apache.flink"            %% "flink-streaming-scala" % flinkVersion % "provided",
   "org.apache.flink"            %% "flink-test-utils"      % flinkVersion % "test",
   "org.scalatest"               %% "scalatest"             % "3.2.10"     % "test",
-  "org.typelevel"               %% "cats-core"             % "2.6.1"      % "test"
+  "org.typelevel"               %% "cats-core"             % "2.7.0"      % "test"
 )
 
 scmInfo := Some(
