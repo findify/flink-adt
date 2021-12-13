@@ -39,7 +39,7 @@ package object api extends LowPrioImplicits {
 
   type Typeclass[T] = TypeInformation[T]
 
-  def combine[T <: Product: ClassTag: TypeTag](
+  def join[T <: Product: ClassTag: TypeTag](
       ctx: CaseClass[TypeInformation, T]
   ): TypeInformation[T] = {
     val cacheKey = typeName(ctx.typeName)
@@ -66,7 +66,7 @@ package object api extends LowPrioImplicits {
     }
   }
 
-  def dispatch[T: ClassTag](
+  def split[T: ClassTag](
       ctx: SealedTrait[TypeInformation, T]
   ): TypeInformation[T] = {
     val cacheKey = typeName(ctx.typeName)
