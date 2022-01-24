@@ -4,7 +4,6 @@ import cats.data.NonEmptyList
 import io.findify.flinkadt.SerializerTest.DeeplyNested.ModeNested.SuperNested.{Egg, Food}
 import io.findify.flinkadt.SerializerTest.NestedRoot.NestedMiddle.NestedBottom
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectOutputStream}
 import io.findify.flinkadt.SerializerTest.{
   ADT,
   ADT2,
@@ -18,11 +17,10 @@ import io.findify.flinkadt.SerializerTest.{
   Generic,
   ListADT,
   Nested,
-  NestedParent,
-  Node,
   P2,
   Param,
   Simple,
+  SimpleEither,
   SimpleJava,
   SimpleList,
   SimpleOption,
@@ -31,14 +29,9 @@ import io.findify.flinkadt.SerializerTest.{
   WrappedADT
 }
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.common.typeutils.TypeSerializer
-import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
-import org.apache.flink.api.scala.typeutils.ScalaCaseClassSerializer
-import org.apache.flink.core.memory.{DataInputViewStreamWrapper, DataOutputViewStreamWrapper}
 import org.scalatest.Inspectors
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import io.findify.flinkadt.api._
 
 class SerializerTest extends AnyFlatSpec with Matchers with Inspectors with TestUtils {
   import io.findify.flinkadt.api._
@@ -151,6 +144,12 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors with Test
     roundtrip(ser, SimpleOption(Some("foo")))
   }
 
+  it should "serialize Either" in {
+    val ser = implicitly[TypeInformation[SimpleEither]].createSerializer(null)
+    all(ser, SimpleEither(Left("foo")))
+    roundtrip(ser, SimpleEither(Right(42)))
+  }
+
   it should "serialize nested list of ADT" in {
     val ser = implicitly[TypeInformation[ListADT]].createSerializer(null)
     all(ser, ListADT(Nil))
@@ -226,6 +225,8 @@ object SerializerTest {
   case class Node(left: Option[Node], right: Option[Node])
 
   case class SimpleOption(a: Option[String])
+
+  case class SimpleEither(a: Either[String, Int])
 
   case class Generic[T](a: T, b: ADT)
 
