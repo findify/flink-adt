@@ -2,7 +2,7 @@ package io.findify.flinkadt
 
 import io.findify.flinkadt.api.serializer._
 import io.findify.flinkadt.api.typeinfo.{CollectionTypeInformation, CoproductTypeInformation, ProductTypeInformation}
-import magnolia1.{CaseClass, Magnolia, SealedTrait}
+import magnolia1.{CaseClass, SealedTrait}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.api.common.typeutils.TypeSerializer
@@ -18,13 +18,7 @@ import org.apache.flink.api.common.typeutils.base.array.{
   StringArraySerializer
 }
 import org.apache.flink.api.scala.createTypeInformation
-import org.apache.flink.api.scala.typeutils.{
-  EitherSerializer,
-  NothingSerializer,
-  OptionSerializer,
-  OptionTypeInfo,
-  ScalaCaseClassSerializer
-}
+import org.apache.flink.api.scala.typeutils.{EitherSerializer, OptionSerializer, OptionTypeInfo}
 
 import scala.language.experimental.macros
 import scala.reflect.runtime.universe._
@@ -34,8 +28,8 @@ import scala.reflect.{ClassTag, classTag}
 import scala.util.{Failure, Success, Try}
 
 package object api extends LowPrioImplicits {
-  val config = new ExecutionConfig()
-  val cache  = mutable.Map[String, TypeInformation[_]]()
+  private[this] val config = new ExecutionConfig()
+  private[this] val cache  = mutable.Map[String, TypeInformation[_]]()
 
   type Typeclass[T] = TypeInformation[T]
 
@@ -47,14 +41,13 @@ package object api extends LowPrioImplicits {
       case Some(cached) => cached.asInstanceOf[TypeInformation[T]]
       case None =>
         val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
-        val serializer = typeOf[T].typeSymbol.isModuleClass match {
-          case true =>
-            new ScalaCaseObjectSerializer[T](clazz)
-          case false =>
-            new ScalaCaseClassSerializer[T](
-              clazz = clazz,
-              scalaFieldSerializers = ctx.parameters.map(_.typeclass.createSerializer(config)).toArray
-            )
+        val serializer = if (typeOf[T].typeSymbol.isModuleClass) {
+          new ScalaCaseObjectSerializer[T](clazz)
+        } else {
+          new ScalaCaseClassSerializer[T](
+            clazz = clazz,
+            scalaFieldSerializers = ctx.parameters.map(_.typeclass.createSerializer(config)).toArray
+          )
         }
         val ti = new ProductTypeInformation[T](
           c = clazz,
@@ -146,8 +139,10 @@ package object api extends LowPrioImplicits {
     new MapSerializer[K, V](ks, vs)
   implicit def seqSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Seq[T]] =
     new SeqSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
-  implicit def eitherSerializer[L: ClassTag, R: ClassTag](implicit ls: TypeSerializer[L], rs: TypeSerializer[R]) =
-    new EitherSerializer[L, R](ls, rs)
+  implicit def eitherSerializer[L: ClassTag, R: ClassTag](implicit
+    ls: TypeSerializer[L],
+    rs: TypeSerializer[R]
+  ): EitherSerializer[L, R] = new EitherSerializer[L, R](ls, rs)
 
   implicit val intArraySerializer: TypeSerializer[Array[Int]]         = new IntPrimitiveArraySerializer()
   implicit val longArraySerializer: TypeSerializer[Array[Long]]       = new LongPrimitiveArraySerializer()
