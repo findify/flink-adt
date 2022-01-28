@@ -18,8 +18,7 @@ Issues:
 * as this project relies on macro to derive TypeSerializer instances, if you're using IntelliJ 2020.*, it may
 highlight your code with red, hinting that it cannot find corresponding implicits. And this is fine, the code
 compiles OK. 2021 is fine with serializers derived with this library.
-* this library is built for Flink 1.14, but marks the `flink-*` dependencies as `provided`, so it should also work with earlier
-versions
+* this library is built for Flink 1.15, which supports arbitrary Scala versions.
 * Supports only Scala 2.12: underlying Magnolia library has no support for 2.11
   
 ## Usage
@@ -34,14 +33,16 @@ To use this library, swap `import org.apache.flink.api.scala._` with `import io.
 So to derive a TypeInformation for a sealed trait, you can do:
 ```scala
 import io.findify.flinkadt.api._
+import org.apache.flink.api.common.typeinfo.TypeInformation
 
-sealed trait Event
-case class Click(id: String) extends Event
-case class Purchase(price: Double) extends Event
+sealed trait Event extends Product with Serializable
 
-// env is a StreamingExecutionEnvironment
-val result = env.fromCollection(List[Event](Click("1"), Purchase(1.0))).executeAndCollect(10)
+object Event {
+  final case class Click(id: String) extends Event
+  final case class Purchase(price: Double) extends Event
 
+  implicit val eventTypeInfo: TypeInformation[Event] = deriveTypeInformation
+}
 ```
 
 Be careful with a wildcard import of `import org.apache.flink.api.scala._`: it has a `createTypeInformation` implicit

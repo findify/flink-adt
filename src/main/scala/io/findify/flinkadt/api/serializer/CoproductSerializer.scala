@@ -1,14 +1,8 @@
 package io.findify.flinkadt.api.serializer
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
-import java.util
-
 import io.findify.flinkadt.api.serializer.CoproductSerializer.CoproductSerializerSnapshot
-import magnolia1.{SealedTrait, Subtype, TypeName}
 import org.apache.flink.api.common.typeutils.base.TypeSerializerSingleton
 import org.apache.flink.api.common.typeutils.{
-  GenericTypeSerializerSnapshot,
-  SimpleTypeSerializerSnapshot,
   TypeSerializer,
   TypeSerializerSchemaCompatibility,
   TypeSerializerSnapshot
