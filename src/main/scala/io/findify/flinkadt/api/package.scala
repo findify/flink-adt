@@ -1,13 +1,12 @@
 package io.findify.flinkadt
 
 import io.findify.flinkadt.api.serializer._
-import io.findify.flinkadt.api.typeinfo.{CollectionTypeInformation, CoproductTypeInformation, EitherTypeInfo, OptionTypeInfo, ProductTypeInformation}
+import io.findify.flinkadt.api.typeinfo._
 import magnolia1.{CaseClass, SealedTrait}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.api.common.typeutils.TypeSerializer
-import org.apache.flink.api.common.typeutils.base.array.{BooleanPrimitiveArraySerializer, BytePrimitiveArraySerializer, CharPrimitiveArraySerializer, DoublePrimitiveArraySerializer, FloatPrimitiveArraySerializer, IntPrimitiveArraySerializer, LongPrimitiveArraySerializer, ShortPrimitiveArraySerializer, StringArraySerializer}
-import org.apache.flink.api.scala.createTypeInformation
+import org.apache.flink.api.common.typeutils.base.array._
 
 import scala.language.experimental.macros
 import scala.reflect.runtime.universe._
@@ -162,14 +161,14 @@ package object api extends LowPrioImplicits {
 
   // type infos
   implicit lazy val stringInfo: TypeInformation[String] = BasicTypeInfo.STRING_TYPE_INFO
-  implicit lazy val intInfo: TypeInformation[Int]       = createTypeInformation[Int]
-  implicit lazy val boolInfo: TypeInformation[Boolean]  = createTypeInformation[Boolean]
-  implicit lazy val byteInfo: TypeInformation[Byte]     = createTypeInformation[Byte]
-  implicit lazy val charInfo: TypeInformation[Char]     = createTypeInformation[Char]
-  implicit lazy val doubleInfo: TypeInformation[Double] = createTypeInformation[Double]
-  implicit lazy val floatInfo: TypeInformation[Float]   = createTypeInformation[Float]
-  implicit lazy val longInfo: TypeInformation[Long]     = createTypeInformation[Long]
-  implicit lazy val shortInfo: TypeInformation[Short]   = createTypeInformation[Short]
+  implicit lazy val intInfo: TypeInformation[Int]       = BasicTypeInfo.getInfoFor(classOf[Int])
+  implicit lazy val boolInfo: TypeInformation[Boolean]  = BasicTypeInfo.getInfoFor(classOf[Boolean])
+  implicit lazy val byteInfo: TypeInformation[Byte]     = BasicTypeInfo.getInfoFor(classOf[Byte])
+  implicit lazy val charInfo: TypeInformation[Char]     = BasicTypeInfo.getInfoFor(classOf[Char])
+  implicit lazy val doubleInfo: TypeInformation[Double] = BasicTypeInfo.getInfoFor(classOf[Double])
+  implicit lazy val floatInfo: TypeInformation[Float]   = BasicTypeInfo.getInfoFor(classOf[Float])
+  implicit lazy val longInfo: TypeInformation[Long]     = BasicTypeInfo.getInfoFor(classOf[Long])
+  implicit lazy val shortInfo: TypeInformation[Short]   = BasicTypeInfo.getInfoFor(classOf[Short])
   // serializers
   implicit lazy val stringSerializer: TypeSerializer[String]   = stringInfo.createSerializer(config)
   implicit lazy val intSerializer: TypeSerializer[Int]         = intInfo.createSerializer(config)

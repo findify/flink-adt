@@ -1,12 +1,9 @@
 package io.findify.flinkadt.api.typeinfo
 
-import magnolia1.{CaseClass, Param}
+import magnolia1.Param
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.TypeSerializer
-import org.apache.flink.api.scala.typeutils.CaseClassTypeInfo
-
-import scala.reflect._
 
 class ProductTypeInformation[T <: Product](c: Class[T], params: Seq[Param[TypeInformation, T]], ser: TypeSerializer[T])
     extends CaseClassTypeInfo[T](
