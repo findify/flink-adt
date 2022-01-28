@@ -5,11 +5,13 @@ import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.test.util.MiniClusterWithClientResource
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+
+import scala.collection.JavaConverters._
 
 class ExampleTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
   lazy val cluster = new MiniClusterWithClientResource(
@@ -41,14 +43,13 @@ class ExampleTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
     import io.findify.flinkadt.api._
 
     implicit val eventTypeInfo: TypeInformation[Event] = deriveTypeInformation[Event]
-    val result = env.fromCollection(List[Event](Click("1"), Purchase(1.0))).executeAndCollect(10)
+    val result = env.fromCollection(List(Click("1"), Purchase(1.0)).asJava, eventTypeInfo).executeAndCollect(10)
     result.size shouldBe 2
   }
 }
 
 object ExampleTest {
-  sealed trait Event
-  case class Click(id: String)       extends Event
-  case class Purchase(price: Double) extends Event
-
+  sealed trait Event extends Product with Serializable
+  final case class Click(id: String) extends Event
+  final case class Purchase(price: Double) extends Event
 }
