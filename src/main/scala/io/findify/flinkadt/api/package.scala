@@ -1,14 +1,13 @@
 package io.findify.flinkadt
 
 import io.findify.flinkadt.api.serializer._
-import io.findify.flinkadt.api.typeinfo.{EitherTypeInfo, CollectionTypeInformation, CoproductTypeInformation, ProductTypeInformation}
+import io.findify.flinkadt.api.typeinfo.{CollectionTypeInformation, CoproductTypeInformation, EitherTypeInfo, OptionTypeInfo, ProductTypeInformation}
 import magnolia1.{CaseClass, SealedTrait}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import org.apache.flink.api.common.typeutils.base.array.{BooleanPrimitiveArraySerializer, BytePrimitiveArraySerializer, CharPrimitiveArraySerializer, DoublePrimitiveArraySerializer, FloatPrimitiveArraySerializer, IntPrimitiveArraySerializer, LongPrimitiveArraySerializer, ShortPrimitiveArraySerializer, StringArraySerializer}
 import org.apache.flink.api.scala.createTypeInformation
-import org.apache.flink.api.scala.typeutils.{OptionSerializer, OptionTypeInfo}
 
 import scala.language.experimental.macros
 import scala.reflect.runtime.universe._
