@@ -23,6 +23,7 @@ import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.{AtomicType, TypeInformation}
 import org.apache.flink.api.common.typeutils.{TypeComparator, TypeSerializer}
 
+import scala.annotation.nowarn
 import scala.collection.JavaConverters._
 
 /**
@@ -44,7 +45,9 @@ class OptionTypeInfo[A, T <: Option[A]](private val elemTypeInfo: TypeInformatio
   override def getArity: Int = 1
   @PublicEvolving
   override def getTypeClass: Class[T] = classOf[Option[_]].asInstanceOf[Class[T]]
+
   @PublicEvolving
+  @nowarn("cat=deprecation")
   override def getGenericParameters: java.util.Map[String, TypeInformation[_]] =
     Map[String, TypeInformation[_]]("A" -> elemTypeInfo).asJava
 
@@ -60,6 +63,7 @@ class OptionTypeInfo[A, T <: Option[A]](private val elemTypeInfo: TypeInformatio
   }
 
   @PublicEvolving
+  @nowarn("msg=Any")
   def createSerializer(executionConfig: ExecutionConfig): TypeSerializer[T] = {
     if (elemTypeInfo == null) {
       // this happens when the type of a DataSet is None, i.e. DataSet[None]

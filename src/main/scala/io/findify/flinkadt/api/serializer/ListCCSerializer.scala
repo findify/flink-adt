@@ -8,11 +8,9 @@ class ListCCSerializer[T](child: TypeSerializer[T], clazz: Class[T]) extends Sim
   override def getLength: Int          = -1
   override def deserialize(source: DataInputView): ::[T] = {
     val count = source.readInt()
-    val result = for {
-      _ <- 0 until count
-    } yield {
-      child.deserialize(source)
-    }
+    val result = (0 until count)
+      .map(_ => child.deserialize(source))
+
     ::(result.head, result.tail.toList)
   }
   override def serialize(record: ::[T], target: DataOutputView): Unit = {
@@ -20,6 +18,6 @@ class ListCCSerializer[T](child: TypeSerializer[T], clazz: Class[T]) extends Sim
     record.foreach(element => child.serialize(element, target))
   }
   override def snapshotConfiguration(): TypeSerializerSnapshot[::[T]] =
-    new CollectionSerializerSnapshot(child, classOf[ListCCSerializer[T]], clazz)
+    new CollectionSerializerSnapshot[::, T, ListCCSerializer[T]](child, classOf[ListCCSerializer[T]], clazz)
 
 }

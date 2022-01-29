@@ -2,7 +2,11 @@ name := "flink-adt"
 
 version := "0.4.5"
 
-scalaVersion := "2.12.15"
+lazy val `scala 2.12` = "2.12.15"
+lazy val `scala 2.13` = "2.13.8"
+
+scalaVersion := `scala 2.13`
+crossScalaVersions := Seq(`scala 2.12`, `scala 2.13`)
 
 organization := "io.findify"
 licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))

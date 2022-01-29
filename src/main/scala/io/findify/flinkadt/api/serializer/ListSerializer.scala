@@ -20,6 +20,6 @@ class ListSerializer[T](child: TypeSerializer[T], clazz: Class[T]) extends Simpl
     record.foreach(element => child.serialize(element, target))
   }
   override def snapshotConfiguration(): TypeSerializerSnapshot[List[T]] =
-    new CollectionSerializerSnapshot(child, classOf[ListSerializer[T]], clazz)
+    new CollectionSerializerSnapshot[List, T, ListSerializer[T]](child, classOf[ListSerializer[T]], clazz)
 
 }

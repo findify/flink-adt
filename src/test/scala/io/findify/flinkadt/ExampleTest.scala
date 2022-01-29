@@ -12,6 +12,8 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import scala.annotation.nowarn
+
 class ExampleTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll {
   import ExampleTest._
 
@@ -62,6 +64,7 @@ object ExampleTest {
   implicit final class EnvOps(private val env: StreamExecutionEnvironment) extends AnyVal {
     import scala.collection.JavaConverters._
 
+    @nowarn("cat=deprecation")
     def fromScalaCollection[A](data: Seq[A])(implicit typeInformation: TypeInformation[A]): DataStreamSource[A] =
       env.fromCollection(data.asJava, typeInformation)
   }

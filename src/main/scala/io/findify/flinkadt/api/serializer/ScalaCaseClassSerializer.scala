@@ -54,7 +54,7 @@ class ScalaCaseClassSerializer[T <: Product](
 }
 
 object ScalaCaseClassSerializer {
-  @nowarn("msg=eliminated by erasure")
+  @nowarn("msg=(eliminated by erasure)|(explicit array)")
   def lookupConstructor[T](cls: Class[T]): Array[AnyRef] => T = {
     val rootMirror = universe.runtimeMirror(cls.getClassLoader)
     val classSymbol = rootMirror.classSymbol(cls)

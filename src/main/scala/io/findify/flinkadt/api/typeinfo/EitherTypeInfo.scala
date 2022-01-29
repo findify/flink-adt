@@ -23,6 +23,7 @@ import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.TypeSerializer
 
+import scala.annotation.nowarn
 import scala.collection.JavaConverters._
 
 /**
@@ -47,7 +48,9 @@ class EitherTypeInfo[A, B, T <: Either[A, B]](
   override def getArity: Int = 1
   @PublicEvolving
   override def getTypeClass: Class[T] = clazz
+
   @PublicEvolving
+  @nowarn("cat=deprecation")
   override def getGenericParameters: java.util.Map[String, TypeInformation[_]] =
     Map[String, TypeInformation[_]]("A" -> leftTypeInfo, "B" -> rightTypeInfo).asJava
 

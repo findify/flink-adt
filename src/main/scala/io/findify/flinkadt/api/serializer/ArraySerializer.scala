@@ -23,8 +23,5 @@ class ArraySerializer[T](val child: TypeSerializer[T], clazz: Class[T]) extends 
     record.foreach(element => child.serialize(element, target))
   }
   override def snapshotConfiguration(): TypeSerializerSnapshot[Array[T]] =
-    new CollectionSerializerSnapshot(child, classOf[ArraySerializer[T]], clazz)
-
-  // CollectionSerializerSnapshot(child, new Serializer[T](_))
-
+    new CollectionSerializerSnapshot[Array, T, ArraySerializer[T]](child, classOf[ArraySerializer[T]], clazz)
 }
