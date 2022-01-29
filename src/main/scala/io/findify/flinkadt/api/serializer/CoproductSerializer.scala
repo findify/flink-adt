@@ -2,13 +2,11 @@ package io.findify.flinkadt.api.serializer
 
 import io.findify.flinkadt.api.serializer.CoproductSerializer.CoproductSerializerSnapshot
 import org.apache.flink.api.common.typeutils.base.TypeSerializerSingleton
-import org.apache.flink.api.common.typeutils.{
-  TypeSerializer,
-  TypeSerializerSchemaCompatibility,
-  TypeSerializerSnapshot
-}
+import org.apache.flink.api.common.typeutils.{TypeSerializer, TypeSerializerSchemaCompatibility, TypeSerializerSnapshot}
 import org.apache.flink.core.memory.{DataInputView, DataOutputView}
 import org.apache.flink.util.InstantiationUtil
+
+import scala.annotation.nowarn
 
 class CoproductSerializer[T](subtypeClasses: Array[Class[_]], subtypeSerializers: Array[TypeSerializer[_]])
     extends TypeSerializerSingleton[T] {
@@ -31,7 +29,7 @@ class CoproductSerializer[T](subtypeClasses: Array[Class[_]], subtypeSerializers
       }
     }
     if (found) {
-      target.writeByte(subtypeIndex.toByte)
+      target.writeByte(subtypeIndex.toByte.toInt)
       subtypeSerializers(subtypeIndex).asInstanceOf[TypeSerializer[T]].serialize(record, target)
     } else {
       throw new IllegalStateException("subtype not found in sealed trait schema")
@@ -40,7 +38,7 @@ class CoproductSerializer[T](subtypeClasses: Array[Class[_]], subtypeSerializers
 
   override def deserialize(source: DataInputView): T = {
     val index   = source.readByte()
-    val subtype = subtypeSerializers(index)
+    val subtype = subtypeSerializers(index.toInt)
     subtype.asInstanceOf[TypeSerializer[T]].deserialize(source)
   }
   override def deserialize(reuse: T, source: DataInputView): T = deserialize(source)
@@ -55,16 +53,21 @@ object CoproductSerializer {
   ) extends TypeSerializerSnapshot[T] {
     def this() = this(Array.empty[Class[_]], Array.empty[TypeSerializer[_]])
 
+    @nowarn("msg=dead code")
     override def readSnapshot(readVersion: Int, in: DataInputView, userCodeClassLoader: ClassLoader): Unit = {
       val len = in.readInt()
-      subtypeClasses = (0 until len).map(_ => InstantiationUtil.resolveClassByName(in, userCodeClassLoader)).toArray
+
+      subtypeClasses = (0 until len)
+        .map(_ => InstantiationUtil.resolveClassByName(in, userCodeClassLoader))
+        .toArray
+
       subtypeSerializers = (0 until len)
-        .map(_ => {
+        .map { _ =>
           val clazz      = InstantiationUtil.resolveClassByName(in, userCodeClassLoader)
           val serializer = InstantiationUtil.instantiate(clazz).asInstanceOf[TypeSerializerSnapshot[_]]
           serializer.readSnapshot(serializer.getCurrentVersion, in, userCodeClassLoader)
           serializer.restoreSerializer()
-        })
+        }
         .toArray
     }
 

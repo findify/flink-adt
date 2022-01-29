@@ -29,7 +29,7 @@ import org.apache.flink.api.common.typeutils._
 import Keys.ExpressionKeys
 import org.apache.flink.api.java.typeutils.TupleTypeInfoBase
 
-import scala.annotation.tailrec
+import scala.annotation.{nowarn, tailrec}
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
@@ -46,6 +46,7 @@ abstract class CaseClassTypeInfo[T <: Product](
 ) extends TupleTypeInfoBase[T](clazz, fieldTypes: _*) {
 
   @PublicEvolving
+  @nowarn("cat=deprecation")
   override def getGenericParameters: java.util.Map[String, TypeInformation[_]] = {
     typeParamTypeInfos.zipWithIndex.map { case (info, index) =>
       "T" + (index + 1) -> info
@@ -121,10 +122,11 @@ abstract class CaseClassTypeInfo[T <: Product](
                 ct.getFlatFields("*", pos, result)
               case _ =>
                 result.add(new FlatFieldDescriptor(pos, fieldTypes(index)))
+                ()
             }
           } else {
             // skipping over non-matching fields
-            extractFlatFields(index + 1, pos + fieldTypes(index).getTotalFields())
+            extractFlatFields(index + 1, pos + fieldTypes(index).getTotalFields)
           }
         }
 

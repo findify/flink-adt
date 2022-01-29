@@ -8,7 +8,6 @@ import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import org.apache.flink.api.common.typeutils.base.array._
 
-import scala.language.experimental.macros
 import scala.reflect.runtime.universe._
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -75,7 +74,7 @@ package object api extends LowPrioImplicits {
   }
 
   private def loadClass(name: String): Option[Class[_]] = {
-    val sanitized = name.replaceAllLiterally("::", "$colon$colon")
+    val sanitized = name.replace("::", "$colon$colon")
     Try(Class.forName(sanitized)) match {
       case Failure(_) =>
         Try(Class.forName(sanitized + "$")) match {
@@ -86,7 +85,7 @@ package object api extends LowPrioImplicits {
     }
   }
   private def replaceLast(str: String, what: Char, dest: Char): Option[String] = {
-    str.lastIndexOf(what) match {
+    str.lastIndexOf(what.toInt) match {
       case -1 => None
       case pos =>
         val arr = str.toCharArray
@@ -120,17 +119,30 @@ package object api extends LowPrioImplicits {
     new ArraySerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
   implicit def setSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Set[T]] =
     new SetSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
-  implicit def mapSerializer[K: ClassTag, V: ClassTag](implicit
+  implicit def mapSerializer[K, V](implicit
+      kc: ClassTag[K],
+      vc: ClassTag[V],
       ks: TypeSerializer[K],
       vs: TypeSerializer[V]
-  ): TypeSerializer[Map[K, V]] =
+  ): TypeSerializer[Map[K, V]] = {
+    drop(kc)
+    drop(vc)
     new MapSerializer[K, V](ks, vs)
+  }
+
   implicit def seqSerializer[T: ClassTag](implicit vs: TypeSerializer[T]): TypeSerializer[Seq[T]] =
     new SeqSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
-  implicit def eitherSerializer[L: ClassTag, R: ClassTag](implicit
+
+  implicit def eitherSerializer[L, R](implicit
+    lc: ClassTag[L],
+    rc: ClassTag[R],
     ls: TypeSerializer[L],
     rs: TypeSerializer[R]
-  ): EitherSerializer[L, R] = new EitherSerializer[L, R](ls, rs)
+  ): EitherSerializer[L, R] = {
+    drop(lc)
+    drop(rc)
+    new EitherSerializer[L, R](ls, rs)
+  }
 
   implicit val intArraySerializer: TypeSerializer[Array[Int]]         = new IntPrimitiveArraySerializer()
   implicit val longArraySerializer: TypeSerializer[Array[Long]]       = new LongPrimitiveArraySerializer()
@@ -190,28 +202,54 @@ package object api extends LowPrioImplicits {
   implicit lazy val jCharInfo: TypeInformation[java.lang.Character]  = BasicTypeInfo.CHAR_TYPE_INFO
   implicit lazy val jShortInfo: TypeInformation[java.lang.Short]     = BasicTypeInfo.SHORT_TYPE_INFO
 
-  implicit def listCCInfo[T: ClassTag](implicit ls: TypeSerializer[::[T]]): TypeInformation[::[T]] =
+  implicit def listCCInfo[T](implicit lc: ClassTag[T], ls: TypeSerializer[::[T]]): TypeInformation[::[T]] = {
+    drop(lc)
     new CollectionTypeInformation[::[T]](ls)
+  }
 
-  implicit def listInfo[T: ClassTag](implicit ls: TypeSerializer[List[T]]): TypeInformation[List[T]] =
+  implicit def listInfo[T](implicit
+    lc: ClassTag[T],
+    ls: TypeSerializer[List[T]]
+  ): TypeInformation[List[T]] = {
+    drop(lc)
     new CollectionTypeInformation[List[T]](ls)
+  }
 
-  implicit def seqInfo[T: ClassTag](implicit ls: TypeSerializer[Seq[T]]): TypeInformation[Seq[T]] =
+  implicit def seqInfo[T](implicit lc: ClassTag[T], ls: TypeSerializer[Seq[T]]): TypeInformation[Seq[T]] = {
+    drop(lc)
     new CollectionTypeInformation[Seq[T]](ls)
+  }
 
-  implicit def vectorInfo[T: ClassTag](implicit ls: TypeSerializer[Vector[T]]): TypeInformation[Vector[T]] =
+  implicit def vectorInfo[T](implicit
+    lc: ClassTag[T],
+    ls: TypeSerializer[Vector[T]]
+  ): TypeInformation[Vector[T]] = {
+    drop(lc)
     new CollectionTypeInformation[Vector[T]](ls)
+  }
 
-  implicit def setInfo[T: ClassTag](implicit ls: TypeSerializer[Set[T]]): TypeInformation[Set[T]] =
+  implicit def setInfo[T](implicit lc: ClassTag[T], ls: TypeSerializer[Set[T]]): TypeInformation[Set[T]] = {
+    drop(lc)
     new CollectionTypeInformation[Set[T]](ls)
+  }
 
-  implicit def arrayInfo[T: ClassTag](implicit ls: TypeSerializer[Array[T]]): TypeInformation[Array[T]] =
+  implicit def arrayInfo[T](implicit
+    lc: ClassTag[T],
+    ls: TypeSerializer[Array[T]]
+  ): TypeInformation[Array[T]] = {
+    drop(lc)
     new CollectionTypeInformation[Array[T]](ls)
+  }
 
-  implicit def mapInfo[K: ClassTag, V: ClassTag](implicit
-      ms: TypeSerializer[Map[K, V]]
-  ): TypeInformation[Map[K, V]] =
+  implicit def mapInfo[K, V](implicit
+    kc: ClassTag[K],
+    vc: ClassTag[V],
+    ms: TypeSerializer[Map[K, V]]
+  ): TypeInformation[Map[K, V]] = {
+    drop(kc)
+    drop(vc)
     new CollectionTypeInformation[Map[K, V]](ms)
+  }
 
   implicit def optionInfo[T](implicit ls: TypeInformation[T]): TypeInformation[Option[T]] =
     new OptionTypeInfo[T, Option[T]](ls)
@@ -222,4 +260,9 @@ package object api extends LowPrioImplicits {
     b: TypeInformation[B]
   ): TypeInformation[Either[A, B]] =
     new EitherTypeInfo(tag.runtimeClass.asInstanceOf[Class[Either[A, B]]], a, b)
+
+  private[flinkadt] def drop[A](a: => A): Unit = {
+    val _ = a
+    ()
+  }
 }

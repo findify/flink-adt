@@ -13,13 +13,13 @@ more Scala-specific TypeSerializer & TypeInformation derivation support.
   in the current scope
 * has no silent fallback to Kryo: it will just fail the compilation in a case when serializer cannot be made
 * reuses all the low-level serialization code from Flink for basic Java and Scala types
+* supports Scala 2.12 & 2.13.
+* built for Flink 1.15, which supports arbitrary Scala versions.
 
 Issues:
 * as this project relies on macro to derive TypeSerializer instances, if you're using IntelliJ 2020.*, it may
 highlight your code with red, hinting that it cannot find corresponding implicits. And this is fine, the code
 compiles OK. 2021 is fine with serializers derived with this library.
-* this library is built for Flink 1.15, which supports arbitrary Scala versions.
-* Supports only Scala 2.12: underlying Magnolia library has no support for 2.11
   
 ## Usage
 

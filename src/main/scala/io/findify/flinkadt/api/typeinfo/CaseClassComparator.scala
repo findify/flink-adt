@@ -35,7 +35,7 @@ class CaseClassComparator[T <: Product](
   scalaSerializers: Array[TypeSerializer[_]]
 ) extends TupleComparatorBase[T](keys, scalaComparators, scalaSerializers) {
 
-  private val extractedKeys = new Array[AnyRef](keys.length)
+  val extractedKeys = new Array[AnyRef](keys.length)
 
   // We cannot use the Clone Constructor from Scala so we have to do it manually
   def duplicate: TypeComparator[T] = {
@@ -145,7 +145,7 @@ class CaseClassComparator[T <: Product](
         i += 1
       }
     } catch {
-      case npex: NullPointerException => throw new NullKeyFieldException(keyPositions(i))
+      case _: NullPointerException => throw new NullKeyFieldException(keyPositions(i))
     }
   }
 

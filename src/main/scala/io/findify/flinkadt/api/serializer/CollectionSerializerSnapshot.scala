@@ -5,23 +5,23 @@ import org.apache.flink.core.memory.{DataInputView, DataOutputView}
 import org.apache.flink.util.InstantiationUtil
 
 class CollectionSerializerSnapshot[F[_], T, S <: TypeSerializer[F[T]]]() extends TypeSerializerSnapshot[F[T]] {
-
   def this(ser: TypeSerializer[T], serClass: Class[S], valueClass: Class[T]) = {
     this()
     nestedSerializer = ser
     clazz = serClass
     vclazz = valueClass
   }
+
   var nestedSerializer: TypeSerializer[T] = _
-  var clazz: Class[S]                     = _
-  var vclazz: Class[T]                    = _
+  var clazz: Class[S] = _
+  var vclazz: Class[T] = _
 
   override def getCurrentVersion: Int = 1
 
   override def readSnapshot(readVersion: Int, in: DataInputView, userCodeClassLoader: ClassLoader): Unit = {
     clazz = InstantiationUtil.resolveClassByName[S](in, userCodeClassLoader)
     vclazz = InstantiationUtil.resolveClassByName[T](in, userCodeClassLoader)
-    val snapClass      = InstantiationUtil.resolveClassByName[TypeSerializerSnapshot[T]](in, userCodeClassLoader)
+    val snapClass = InstantiationUtil.resolveClassByName[TypeSerializerSnapshot[T]](in, userCodeClassLoader)
     val nestedSnapshot = InstantiationUtil.instantiate(snapClass)
     nestedSnapshot.readSnapshot(nestedSnapshot.getCurrentVersion, in, userCodeClassLoader)
     nestedSerializer = nestedSnapshot.restoreSerializer()
@@ -53,5 +53,4 @@ class CollectionSerializerSnapshot[F[_], T, S <: TypeSerializer[F[T]]]() extends
     val constructor = clazz.getConstructors()(0)
     constructor.newInstance(nestedSerializer, vclazz).asInstanceOf[TypeSerializer[F[T]]]
   }
-
 }
