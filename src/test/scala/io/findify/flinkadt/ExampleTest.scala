@@ -55,7 +55,7 @@ object ExampleTest {
   sealed trait Event extends Product with Serializable
 
   object Event {
-    final case class Click(id: String) extends Event
+    final case class Click(id: String)       extends Event
     final case class Purchase(price: Double) extends Event
 
     implicit val eventTypeInfo: TypeInformation[Event] = deriveTypeInformation[Event]

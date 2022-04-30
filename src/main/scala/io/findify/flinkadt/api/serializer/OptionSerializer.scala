@@ -21,13 +21,11 @@ import org.apache.flink.annotation.Internal
 import org.apache.flink.api.common.typeutils._
 import org.apache.flink.core.memory.{DataInputView, DataOutputView}
 
-/**
- * Serializer for [[Option]].
- */
+/** Serializer for [[Option]].
+  */
 @Internal
 @SerialVersionUID(-8635243274072627338L)
-class OptionSerializer[A](val elemSerializer: TypeSerializer[A])
-  extends TypeSerializer[Option[A]] {
+class OptionSerializer[A](val elemSerializer: TypeSerializer[A]) extends TypeSerializer[Option[A]] {
 
   override def duplicate: OptionSerializer[A] = {
     val duplicatedElemSerializer = elemSerializer.duplicate()
@@ -49,7 +47,7 @@ class OptionSerializer[A](val elemSerializer: TypeSerializer[A])
 
   override def copy(from: Option[A]): Option[A] = from match {
     case Some(a) => Some(elemSerializer.copy(a))
-    case None => from
+    case None    => from
   }
 
   override def copy(from: Option[A], reuse: Option[A]): Option[A] = copy(from)

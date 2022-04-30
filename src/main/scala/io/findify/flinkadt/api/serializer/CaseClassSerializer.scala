@@ -23,16 +23,15 @@ import org.apache.flink.api.java.typeutils.runtime.TupleSerializerBase
 import org.apache.flink.core.memory.{DataInputView, DataOutputView}
 import org.apache.flink.types.NullFieldException
 
-/**
- * Serializer for Case Classes. Creation and access is different from
- * our Java Tuples so we have to treat them differently.
- * Copied from Flink 1.14.
- */
+/** Serializer for Case Classes. Creation and access is different from
+  * our Java Tuples so we have to treat them differently.
+  * Copied from Flink 1.14.
+  */
 @Internal
 @SerialVersionUID(7341356073446263475L)
 abstract class CaseClassSerializer[T <: Product](
-  clazz: Class[T],
-  scalaFieldSerializers: Array[TypeSerializer[_]]
+    clazz: Class[T],
+    scalaFieldSerializers: Array[TypeSerializer[_]]
 ) extends TupleSerializerBase[T](clazz, scalaFieldSerializers)
     with Cloneable {
 
@@ -59,8 +58,7 @@ abstract class CaseClassSerializer[T <: Product](
   def createInstance: T = {
     if (instanceCreationFailed) {
       null.asInstanceOf[T]
-    }
-    else {
+    } else {
       initArray()
       try {
         var i = 0
@@ -69,8 +67,7 @@ abstract class CaseClassSerializer[T <: Product](
           i += 1
         }
         createInstance(fields)
-      }
-      catch {
+      } catch {
         case _: Throwable =>
           instanceCreationFailed = true
           null.asInstanceOf[T]
@@ -78,7 +75,7 @@ abstract class CaseClassSerializer[T <: Product](
     }
   }
 
-  override def createOrReuseInstance(fields: Array[Object], reuse: T) : T = {
+  override def createOrReuseInstance(fields: Array[Object], reuse: T): T = {
     createInstance(fields)
   }
 
@@ -89,8 +86,7 @@ abstract class CaseClassSerializer[T <: Product](
   def copy(from: T): T = {
     if (from == null) {
       null.asInstanceOf[T]
-    }
-    else {
+    } else {
       initArray()
       var i = 0
       while (i < arity) {
@@ -105,9 +101,8 @@ abstract class CaseClassSerializer[T <: Product](
     var i = 0
     while (i < arity) {
       val serializer = fieldSerializers(i).asInstanceOf[TypeSerializer[Any]]
-      val o = value.productElement(i)
-      try
-        serializer.serialize(o, target)
+      val o          = value.productElement(i)
+      try serializer.serialize(o, target)
       catch {
         case e: NullPointerException =>
           throw new NullFieldException(i, e)

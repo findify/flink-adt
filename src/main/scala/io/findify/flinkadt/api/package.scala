@@ -134,10 +134,10 @@ package object api extends LowPrioImplicits {
     new SeqSerializer[T](vs, classTag[T].runtimeClass.asInstanceOf[Class[T]])
 
   implicit def eitherSerializer[L, R](implicit
-    lc: ClassTag[L],
-    rc: ClassTag[R],
-    ls: TypeSerializer[L],
-    rs: TypeSerializer[R]
+      lc: ClassTag[L],
+      rc: ClassTag[R],
+      ls: TypeSerializer[L],
+      rs: TypeSerializer[R]
   ): EitherSerializer[L, R] = {
     drop(lc)
     drop(rc)
@@ -208,8 +208,8 @@ package object api extends LowPrioImplicits {
   }
 
   implicit def listInfo[T](implicit
-    lc: ClassTag[T],
-    ls: TypeSerializer[List[T]]
+      lc: ClassTag[T],
+      ls: TypeSerializer[List[T]]
   ): TypeInformation[List[T]] = {
     drop(lc)
     new CollectionTypeInformation[List[T]](ls)
@@ -221,8 +221,8 @@ package object api extends LowPrioImplicits {
   }
 
   implicit def vectorInfo[T](implicit
-    lc: ClassTag[T],
-    ls: TypeSerializer[Vector[T]]
+      lc: ClassTag[T],
+      ls: TypeSerializer[Vector[T]]
   ): TypeInformation[Vector[T]] = {
     drop(lc)
     new CollectionTypeInformation[Vector[T]](ls)
@@ -234,17 +234,17 @@ package object api extends LowPrioImplicits {
   }
 
   implicit def arrayInfo[T](implicit
-    lc: ClassTag[T],
-    ls: TypeSerializer[Array[T]]
+      lc: ClassTag[T],
+      ls: TypeSerializer[Array[T]]
   ): TypeInformation[Array[T]] = {
     drop(lc)
     new CollectionTypeInformation[Array[T]](ls)
   }
 
   implicit def mapInfo[K, V](implicit
-    kc: ClassTag[K],
-    vc: ClassTag[V],
-    ms: TypeSerializer[Map[K, V]]
+      kc: ClassTag[K],
+      vc: ClassTag[V],
+      ms: TypeSerializer[Map[K, V]]
   ): TypeInformation[Map[K, V]] = {
     drop(kc)
     drop(vc)
@@ -255,9 +255,9 @@ package object api extends LowPrioImplicits {
     new OptionTypeInfo[T, Option[T]](ls)
 
   implicit def eitherInfo[A, B](implicit
-    tag: ClassTag[Either[A, B]],
-    a: TypeInformation[A],
-    b: TypeInformation[B]
+      tag: ClassTag[Either[A, B]],
+      a: TypeInformation[A],
+      b: TypeInformation[B]
   ): TypeInformation[Either[A, B]] =
     new EitherTypeInfo(tag.runtimeClass.asInstanceOf[Class[Either[A, B]]], a, b)
 

@@ -13,15 +13,15 @@ class CollectionSerializerSnapshot[F[_], T, S <: TypeSerializer[F[T]]]() extends
   }
 
   var nestedSerializer: TypeSerializer[T] = _
-  var clazz: Class[S] = _
-  var vclazz: Class[T] = _
+  var clazz: Class[S]                     = _
+  var vclazz: Class[T]                    = _
 
   override def getCurrentVersion: Int = 1
 
   override def readSnapshot(readVersion: Int, in: DataInputView, userCodeClassLoader: ClassLoader): Unit = {
     clazz = InstantiationUtil.resolveClassByName[S](in, userCodeClassLoader)
     vclazz = InstantiationUtil.resolveClassByName[T](in, userCodeClassLoader)
-    val snapClass = InstantiationUtil.resolveClassByName[TypeSerializerSnapshot[T]](in, userCodeClassLoader)
+    val snapClass      = InstantiationUtil.resolveClassByName[TypeSerializerSnapshot[T]](in, userCodeClassLoader)
     val nestedSnapshot = InstantiationUtil.instantiate(snapClass)
     nestedSnapshot.readSnapshot(nestedSnapshot.getCurrentVersion, in, userCodeClassLoader)
     nestedSerializer = nestedSnapshot.restoreSerializer()

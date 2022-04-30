@@ -26,14 +26,13 @@ import org.apache.flink.api.common.typeutils.TypeSerializer
 import scala.annotation.nowarn
 import scala.collection.JavaConverters._
 
-/**
- * TypeInformation [[Either]].
- */
+/** TypeInformation [[Either]].
+  */
 @Public
 class EitherTypeInfo[A, B, T <: Either[A, B]](
-  val clazz: Class[T],
-  val leftTypeInfo: TypeInformation[A],
-  val rightTypeInfo: TypeInformation[B]
+    val clazz: Class[T],
+    val leftTypeInfo: TypeInformation[A],
+    val rightTypeInfo: TypeInformation[B]
 ) extends TypeInformation[T] {
 
   @PublicEvolving

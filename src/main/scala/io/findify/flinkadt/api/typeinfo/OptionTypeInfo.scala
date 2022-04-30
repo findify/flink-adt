@@ -26,12 +26,12 @@ import org.apache.flink.api.common.typeutils.{TypeComparator, TypeSerializer}
 import scala.annotation.nowarn
 import scala.collection.JavaConverters._
 
-/**
- * TypeInformation for [[Option]].
- */
+/** TypeInformation for [[Option]].
+  */
 @Public
 class OptionTypeInfo[A, T <: Option[A]](private val elemTypeInfo: TypeInformation[A])
-  extends TypeInformation[T] with AtomicType[T] {
+    extends TypeInformation[T]
+    with AtomicType[T] {
 
   @PublicEvolving
   override def isBasicType: Boolean = false
@@ -54,7 +54,8 @@ class OptionTypeInfo[A, T <: Option[A]](private val elemTypeInfo: TypeInformatio
   @PublicEvolving
   override def createComparator(ascending: Boolean, executionConfig: ExecutionConfig): TypeComparator[T] = {
     if (isKeyType) {
-      val elemCompartor = elemTypeInfo.asInstanceOf[AtomicType[A]]
+      val elemCompartor = elemTypeInfo
+        .asInstanceOf[AtomicType[A]]
         .createComparator(ascending, executionConfig)
       new OptionTypeComparator[A](ascending, elemCompartor).asInstanceOf[TypeComparator[T]]
     } else {

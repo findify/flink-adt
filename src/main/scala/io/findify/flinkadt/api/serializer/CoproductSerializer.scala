@@ -61,14 +61,12 @@ object CoproductSerializer {
         .map(_ => InstantiationUtil.resolveClassByName(in, userCodeClassLoader))
         .toArray
 
-      subtypeSerializers = (0 until len)
-        .map { _ =>
-          val clazz      = InstantiationUtil.resolveClassByName(in, userCodeClassLoader)
-          val serializer = InstantiationUtil.instantiate(clazz).asInstanceOf[TypeSerializerSnapshot[_]]
-          serializer.readSnapshot(serializer.getCurrentVersion, in, userCodeClassLoader)
-          serializer.restoreSerializer()
-        }
-        .toArray
+      subtypeSerializers = (0 until len).map { _ =>
+        val clazz      = InstantiationUtil.resolveClassByName(in, userCodeClassLoader)
+        val serializer = InstantiationUtil.instantiate(clazz).asInstanceOf[TypeSerializerSnapshot[_]]
+        serializer.readSnapshot(serializer.getCurrentVersion, in, userCodeClassLoader)
+        serializer.restoreSerializer()
+      }.toArray
     }
 
     override def getCurrentVersion: Int = 1

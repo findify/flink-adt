@@ -25,14 +25,13 @@ import java.io.ObjectInputStream
 import scala.annotation.nowarn
 import scala.reflect.runtime.universe
 
-/**
- * This is a non macro-generated, concrete Scala case class serializer.
- * Copied from Flink 1.14 without `SelfResolvingTypeSerializer`.
- */
+/** This is a non macro-generated, concrete Scala case class serializer.
+  * Copied from Flink 1.14 without `SelfResolvingTypeSerializer`.
+  */
 @SerialVersionUID(1L)
 class ScalaCaseClassSerializer[T <: Product](
-  clazz: Class[T],
-  scalaFieldSerializers: Array[TypeSerializer[_]]
+    clazz: Class[T],
+    scalaFieldSerializers: Array[TypeSerializer[_]]
 ) extends CaseClassSerializer[T](clazz, scalaFieldSerializers) {
 
   @transient
@@ -56,7 +55,7 @@ class ScalaCaseClassSerializer[T <: Product](
 object ScalaCaseClassSerializer {
   @nowarn("msg=(eliminated by erasure)|(explicit array)")
   def lookupConstructor[T](cls: Class[T]): Array[AnyRef] => T = {
-    val rootMirror = universe.runtimeMirror(cls.getClassLoader)
+    val rootMirror  = universe.runtimeMirror(cls.getClassLoader)
     val classSymbol = rootMirror.classSymbol(cls)
 
     require(
@@ -79,7 +78,7 @@ object ScalaCaseClassSerializer {
       .head
       .asMethod
 
-    val classMirror = rootMirror.reflectClass(classSymbol)
+    val classMirror             = rootMirror.reflectClass(classSymbol)
     val constructorMethodMirror = classMirror.reflectConstructor(primaryConstructorSymbol)
 
     arr: Array[AnyRef] => {

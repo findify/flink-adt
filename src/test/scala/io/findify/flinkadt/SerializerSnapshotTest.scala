@@ -1,7 +1,16 @@
 package io.findify.flinkadt
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import io.findify.flinkadt.SerializerSnapshotTest.{ADT2, OuterTrait, SimpleClass1, SimpleClassArray, SimpleClassList, SimpleClassMap1, SimpleClassMap2, TraitMap}
+import io.findify.flinkadt.SerializerSnapshotTest.{
+  ADT2,
+  OuterTrait,
+  SimpleClass1,
+  SimpleClassArray,
+  SimpleClassList,
+  SimpleClassMap1,
+  SimpleClassMap2,
+  TraitMap
+}
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import org.apache.flink.core.memory.{DataInputViewStreamWrapper, DataOutputViewStreamWrapper}
 import org.scalatest.flatspec.AnyFlatSpec
