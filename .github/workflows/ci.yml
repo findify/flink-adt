@@ -38,5 +38,5 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
       - name: Run tests
-        run: sbt "++ ${{ matrix.platform }} test"
+        run: sbt "++ ${{ matrix.scala }} test"
 
