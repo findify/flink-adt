@@ -36,11 +36,11 @@ object MapSerializer {
     override def getCurrentVersion: Int = 1
 
     override def readSnapshot(readVersion: Int, in: DataInputView, userCodeClassLoader: ClassLoader): Unit = {
-      keySerializer = readSerializer[K](readVersion, in, userCodeClassLoader)
-      valueSerializer = readSerializer[V](readVersion, in, userCodeClassLoader)
+      keySerializer = readSerializer[K](in, userCodeClassLoader)
+      valueSerializer = readSerializer[V](in, userCodeClassLoader)
     }
 
-    def readSerializer[T](readVersion: Int, in: DataInputView, userCodeClassLoader: ClassLoader) = {
+    def readSerializer[T](in: DataInputView, userCodeClassLoader: ClassLoader): TypeSerializer[T] = {
       val snapClass      = InstantiationUtil.resolveClassByName[TypeSerializerSnapshot[T]](in, userCodeClassLoader)
       val nestedSnapshot = InstantiationUtil.instantiate(snapClass)
       nestedSnapshot.readSnapshot(nestedSnapshot.getCurrentVersion, in, userCodeClassLoader)

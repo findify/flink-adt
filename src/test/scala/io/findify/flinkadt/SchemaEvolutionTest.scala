@@ -1,17 +1,14 @@
 package io.findify.flinkadt
 
-import com.google.common.io.Files
 import io.findify.flinkadt.SchemaEvolutionTest.{Click, Event}
-import org.apache.flink.core.memory.{DataInputViewStreamWrapper, DataOutputViewStreamWrapper}
+import org.apache.flink.core.memory.DataInputViewStreamWrapper
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import java.io.{ByteArrayOutputStream, File}
 
 class SchemaEvolutionTest extends AnyFlatSpec with Matchers {
   import io.findify.flinkadt.api._
 
-  val ti = deriveTypeInformation[Event]
+  private val ti = deriveTypeInformation[Event]
 
 //  it should "generate blob for event=click+purchase" in {
 //    val buffer = new ByteArrayOutputStream()

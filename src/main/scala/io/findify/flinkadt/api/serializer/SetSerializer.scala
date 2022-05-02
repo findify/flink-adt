@@ -20,6 +20,6 @@ class SetSerializer[T](child: TypeSerializer[T], clazz: Class[T]) extends Simple
     record.foreach(element => child.serialize(element, target))
   }
   override def snapshotConfiguration(): TypeSerializerSnapshot[Set[T]] =
-    new CollectionSerializerSnapshot(child, classOf[SetSerializer[T]], clazz)
+    new CollectionSerializerSnapshot[Set, T, SetSerializer[T]](child, classOf[SetSerializer[T]], clazz)
 
 }

@@ -4,12 +4,8 @@ import cats.data.NonEmptyList
 import io.findify.flinkadt.AnyTest.FAny
 import io.findify.flinkadt.AnyTest.Filter.{FTerm, StringTerm, TermFilter}
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.common.typeutils.TypeSerializer
-import org.apache.flink.core.memory.{DataInputViewStreamWrapper, DataOutputViewStreamWrapper}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 class AnyTest extends AnyFlatSpec with Matchers with TestUtils {
   import io.findify.flinkadt.api._

@@ -5,13 +5,13 @@ import org.apache.flink.core.memory.{DataInputView, DataOutputView}
 import org.apache.flink.util.InstantiationUtil
 
 class CollectionSerializerSnapshot[F[_], T, S <: TypeSerializer[F[T]]]() extends TypeSerializerSnapshot[F[T]] {
-
   def this(ser: TypeSerializer[T], serClass: Class[S], valueClass: Class[T]) = {
     this()
     nestedSerializer = ser
     clazz = serClass
     vclazz = valueClass
   }
+
   var nestedSerializer: TypeSerializer[T] = _
   var clazz: Class[S]                     = _
   var vclazz: Class[T]                    = _
@@ -53,5 +53,4 @@ class CollectionSerializerSnapshot[F[_], T, S <: TypeSerializer[F[T]]]() extends
     val constructor = clazz.getConstructors()(0)
     constructor.newInstance(nestedSerializer, vclazz).asInstanceOf[TypeSerializer[F[T]]]
   }
-
 }

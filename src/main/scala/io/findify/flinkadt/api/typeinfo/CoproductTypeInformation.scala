@@ -4,8 +4,6 @@ import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.TypeSerializer
 
-import scala.reflect._
-
 case class CoproductTypeInformation[T](c: Class[T], ser: TypeSerializer[T]) extends TypeInformation[T] {
   override def createSerializer(config: ExecutionConfig): TypeSerializer[T] = ser
   override def isBasicType: Boolean                                         = false

@@ -17,6 +17,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import io.findify.flinkadt.api._
 import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.scalatest.Assertion
 
 class SerializerSnapshotTest extends AnyFlatSpec with Matchers {
 
@@ -60,11 +61,12 @@ class SerializerSnapshotTest extends AnyFlatSpec with Matchers {
   }
 
   it should "do map ser snapshot adt " in {
-    implicit val ti = deriveTypeInformation[OuterTrait]
+    implicit val ti: Typeclass[OuterTrait] = deriveTypeInformation[OuterTrait]
+    drop(ti)
     roundtripSerializer(deriveTypeInformation[TraitMap].createSerializer(null))
   }
 
-  def roundtripSerializer[T](ser: TypeSerializer[T]) = {
+  def roundtripSerializer[T](ser: TypeSerializer[T]): Assertion = {
     val snap   = ser.snapshotConfiguration()
     val buffer = new ByteArrayOutputStream()
     val output = new DataOutputViewStreamWrapper(buffer)

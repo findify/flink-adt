@@ -20,6 +20,6 @@ class VectorSerializer[T](child: TypeSerializer[T], clazz: Class[T]) extends Sim
     record.foreach(element => child.serialize(element, target))
   }
   override def snapshotConfiguration(): TypeSerializerSnapshot[Vector[T]] =
-    new CollectionSerializerSnapshot(child, classOf[VectorSerializer[T]], clazz)
+    new CollectionSerializerSnapshot[Vector, T, VectorSerializer[T]](child, classOf[VectorSerializer[T]], clazz)
 
 }

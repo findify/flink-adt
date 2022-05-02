@@ -2,7 +2,11 @@ name := "flink-adt"
 
 version := "0.4.5"
 
-scalaVersion := "2.12.15"
+lazy val `scala 2.12` = "2.12.15"
+lazy val `scala 2.13` = "2.13.8"
+
+scalaVersion := `scala 2.13`
+crossScalaVersions := Seq(`scala 2.12`, `scala 2.13`)
 
 organization := "io.findify"
 licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
@@ -12,15 +16,15 @@ publishMavenStyle := true
 
 publishTo := sonatypePublishToBundle.value
 
-lazy val flinkVersion = "1.14.0"
+lazy val flinkVersion = "1.15.0"
 
 libraryDependencies ++= Seq(
-  "com.softwaremill.magnolia1_2" % "magnolia_2.12"         % "1.0.0-M7",
-  "org.apache.flink"            %% "flink-scala"           % flinkVersion % "provided",
-  "org.apache.flink"            %% "flink-streaming-scala" % flinkVersion % "provided",
-  "org.apache.flink"            %% "flink-test-utils"      % flinkVersion % "test",
-  "org.scalatest"               %% "scalatest"             % "3.2.10"     % "test",
-  "org.typelevel"               %% "cats-core"             % "2.7.0"      % "test"
+  "com.softwaremill.magnolia1_2" %% "magnolia"         % "1.1.2",
+  "org.apache.flink"              % "flink-java"       % flinkVersion % "provided",
+  "org.apache.flink"              % "flink-test-utils" % flinkVersion % "test",
+  "org.scalatest"                %% "scalatest"        % "3.2.11"     % "test",
+  "org.typelevel"                %% "cats-core"        % "2.7.0"      % "test",
+  "org.scala-lang"                % "scala-reflect"    % scalaVersion.value
 )
 
 scmInfo := Some(
