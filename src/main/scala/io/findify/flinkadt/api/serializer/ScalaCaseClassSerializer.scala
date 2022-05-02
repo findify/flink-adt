@@ -81,7 +81,7 @@ object ScalaCaseClassSerializer {
     val classMirror             = rootMirror.reflectClass(classSymbol)
     val constructorMethodMirror = classMirror.reflectConstructor(primaryConstructorSymbol)
 
-    arr: Array[AnyRef] => {
+    (arr: Array[AnyRef]) => {
       constructorMethodMirror.apply(arr: _*).asInstanceOf[T]
     }
   }

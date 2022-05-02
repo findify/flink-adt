@@ -14,7 +14,8 @@ jobs:
     runs-on: ${{ matrix.platform }}
     strategy:
       matrix:
-        java: [8, 11]
+        java: [11, 17]
+        scala: [2.12.15, 2.13.8]
         platform: [ubuntu-20.04]
     steps:
       - uses: actions/checkout@v2
@@ -37,4 +38,5 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
       - name: Run tests
-        run: sbt test
+        run: sbt "++ ${{ matrix.scala }} test"
+
