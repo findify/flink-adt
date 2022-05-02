@@ -14,18 +14,18 @@ more Scala-specific TypeSerializer & TypeInformation derivation support.
 * has no silent fallback to Kryo: it will just fail the compilation in a case when serializer cannot be made
 * reuses all the low-level serialization code from Flink for basic Java and Scala types
 * supports Scala 2.12 & 2.13.
-* built for Flink 1.15, which supports arbitrary Scala versions.
+* built for scala-free Flink 1.15, which supports arbitrary Scala versions.
 
 Issues:
 * as this project relies on macro to derive TypeSerializer instances, if you're using IntelliJ 2020.*, it may
 highlight your code with red, hinting that it cannot find corresponding implicits. And this is fine, the code
-compiles OK. 2021 is fine with serializers derived with this library.
+compiles OK. 2022.1 is fine with serializers derived with this library.
   
 ## Usage
 
 `flink-adt` is released to Maven-central. For SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.findify" %% "flink-adt" % "0.4.5"
+libraryDependencies += "io.findify" %% "flink-adt" % "0.5.0"
 ```
 
 To use this library, swap `import org.apache.flink.api.scala._` with `import io.findify.flinkadt.api._` and enjoy.
@@ -70,7 +70,7 @@ may have issues while migrating state snapshots from TraversableSerializer to Fl
 
 The MIT License (MIT)
 
-Copyright (c) 2021 Findify AB
+Copyright (c) 2022 Findify AB
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
