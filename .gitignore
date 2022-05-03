@@ -3,3 +3,6 @@ project/target/*
 target/
 .idea
 .bsp
+.metals
+.vscode
+metals.sbt

@@ -14,11 +14,11 @@ import scala.reflect.runtime.universe.{Try => _, _}
 import scala.util.{Failure, Success, Try}
 
 private[api] trait LowPrioImplicits {
+  type Typeclass[T] = TypeInformation[T]
+
   protected def config: ExecutionConfig
 
   protected def cache: mutable.Map[String, Typeclass[_]]
-
-  type Typeclass[T] = TypeInformation[T]
 
   def join[T <: Product: ClassTag: TypeTag](
       ctx: CaseClass[TypeInformation, T]
@@ -38,7 +38,8 @@ private[api] trait LowPrioImplicits {
         }
         val ti = new ProductTypeInformation[T](
           c = clazz,
-          params = ctx.parameters,
+          fieldTypes = ctx.parameters.map(_.typeclass),
+          fieldNames = ctx.parameters.map(_.label),
           ser = serializer
         )
         cache.put(cacheKey, ti)

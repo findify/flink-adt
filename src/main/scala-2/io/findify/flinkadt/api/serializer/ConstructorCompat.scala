@@ -3,7 +3,7 @@ package io.findify.flinkadt.api.serializer
 import scala.annotation.nowarn
 import scala.reflect.runtime.universe
 
-trait ConstructorCompat { self: ScalaCaseClassSerializer.type =>
+private[serializer] trait ConstructorCompat {
   @nowarn("msg=(eliminated by erasure)|(explicit array)")
   def lookupConstructor[T](cls: Class[T]): Array[AnyRef] => T = {
     val rootMirror  = universe.runtimeMirror(cls.getClassLoader)
