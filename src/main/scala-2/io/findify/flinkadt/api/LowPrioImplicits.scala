@@ -53,12 +53,7 @@ private[api] trait LowPrioImplicits {
       case Some(cached) => cached.asInstanceOf[TypeInformation[T]]
       case None =>
         val serializer = new CoproductSerializer[T](
-          subtypeClasses = ctx.subtypes
-            .map(_.typeName)
-            .map { c =>
-              guessClass(c.full).getOrElse(throw new ClassNotFoundException(c.full))
-            }
-            .toArray,
+          subtypeClasses = ctx.subtypes.map(_.typeclass.getTypeClass).toArray,
           subtypeSerializers = ctx.subtypes.map(_.typeclass.createSerializer(config)).toArray
         )
         val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
