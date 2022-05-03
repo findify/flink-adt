@@ -21,13 +21,13 @@ package io.findify.flinkadt.api.serializer;
 import org.apache.flink.annotation.Internal;
 import org.apache.flink.api.common.typeutils.CompositeTypeSerializerSnapshot;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
-import org.apache.flink.api.common.typeutils.TypeSerializerConfigSnapshot;
 import org.apache.flink.api.common.typeutils.TypeSerializerSnapshot;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 import org.apache.flink.util.InstantiationUtil;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
@@ -38,35 +38,24 @@ import static org.apache.flink.util.Preconditions.checkState;
 public final class ScalaCaseClassSerializerSnapshot<T extends scala.Product>
         extends CompositeTypeSerializerSnapshot<T, ScalaCaseClassSerializer<T>> {
 
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
 
     private Class<T> type;
+
+    private Class<?>[] fieldTypes;
 
     /** Used via reflection. */
     @SuppressWarnings("unused")
     public ScalaCaseClassSerializerSnapshot() {
         super(ScalaCaseClassSerializer.class);
-    }
-
-    /**
-     * Used for delegating schema compatibility checks from serializers that were previously using
-     * {@code TupleSerializerConfigSnapshot}. Type is the {@code outerSnapshot} information, that is
-     * required to perform {@link #internalResolveSchemaCompatibility(TypeSerializer,
-     * TypeSerializerSnapshot[])}.
-     *
-     * <p>This is used in {@link
-     * ScalaCaseClassSerializer#resolveSchemaCompatibilityViaRedirectingToNewSnapshotClass(TypeSerializerConfigSnapshot)}.
-     */
-    @Internal
-    ScalaCaseClassSerializerSnapshot(Class<T> type) {
-        super(ScalaCaseClassSerializer.class);
-        this.type = checkNotNull(type, "type can not be NULL");
+        fieldTypes = new Class<?>[]{};
     }
 
     /** Used for the snapshot path. */
     public ScalaCaseClassSerializerSnapshot(ScalaCaseClassSerializer<T> serializerInstance) {
         super(serializerInstance);
         this.type = checkNotNull(serializerInstance.getTupleClass(), "tuple class can not be NULL");
+        this.fieldTypes = checkNotNull(serializerInstance.fieldClasses(), "field types can not be NULL");
     }
 
     @Override
@@ -84,13 +73,20 @@ public final class ScalaCaseClassSerializerSnapshot<T extends scala.Product>
     protected ScalaCaseClassSerializer<T> createOuterSerializerWithNestedSerializers(
             TypeSerializer<?>[] nestedSerializers) {
         checkState(type != null, "type can not be NULL");
-        return new ScalaCaseClassSerializer<>(type, nestedSerializers);
+        checkState(fieldTypes != null, "field types can not be NULL");
+        return new ScalaCaseClassSerializer<>(type, fieldTypes, nestedSerializers);
     }
 
     @Override
     protected void writeOuterSnapshot(DataOutputView out) throws IOException {
         checkState(type != null, "type can not be NULL");
+        checkState(fieldTypes != null, "field types can not be NULL");
+
         out.writeUTF(type.getName());
+        out.writeInt(fieldTypes.length);
+        for (Class<?> fieldType : fieldTypes) {
+            out.writeUTF(fieldType.getName());
+        }
     }
 
     @Override
@@ -98,13 +94,24 @@ public final class ScalaCaseClassSerializerSnapshot<T extends scala.Product>
             int readOuterSnapshotVersion, DataInputView in, ClassLoader userCodeClassLoader)
             throws IOException {
         this.type = InstantiationUtil.resolveClassByName(in, userCodeClassLoader);
+
+        int length = in.readInt();
+        Class<?>[] fields = new Class[length];
+        for (int i = 0; i < length; i++) {
+            fields[i] = InstantiationUtil.resolveClassByName(in, userCodeClassLoader);
+        }
+
+        this.fieldTypes = fields;
     }
 
     @Override
     protected CompositeTypeSerializerSnapshot.OuterSchemaCompatibility
     resolveOuterSchemaCompatibility(ScalaCaseClassSerializer<T> newSerializer) {
-        return (Objects.equals(type, newSerializer.getTupleClass()))
-                ? OuterSchemaCompatibility.COMPATIBLE_AS_IS
-                : OuterSchemaCompatibility.INCOMPATIBLE;
+        if (Objects.equals(type, newSerializer.getTupleClass()) &&
+                Arrays.equals(fieldTypes, newSerializer.fieldClasses())) {
+            return OuterSchemaCompatibility.COMPATIBLE_AS_IS;
+        } else {
+            return OuterSchemaCompatibility.INCOMPATIBLE;
+        }
     }
 }

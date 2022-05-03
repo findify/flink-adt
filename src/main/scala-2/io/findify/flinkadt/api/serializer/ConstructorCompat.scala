@@ -4,8 +4,11 @@ import scala.annotation.nowarn
 import scala.reflect.runtime.universe
 
 private[serializer] trait ConstructorCompat {
+  // Parameter classes are required for the Scala 3 implementation,
+  // so need to match the method signature here.
   @nowarn("msg=(eliminated by erasure)|(explicit array)")
-  def lookupConstructor[T](cls: Class[T]): Array[AnyRef] => T = {
+  def lookupConstructor[T](cls: Class[T], parameterClasses: Array[Class[_]]): Array[AnyRef] => T = {
+    val _           = parameterClasses
     val rootMirror  = universe.runtimeMirror(cls.getClassLoader)
     val classSymbol = rootMirror.classSymbol(cls)
 

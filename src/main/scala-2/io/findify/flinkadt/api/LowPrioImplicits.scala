@@ -33,6 +33,7 @@ private[api] trait LowPrioImplicits {
         } else {
           new ScalaCaseClassSerializer[T](
             clazz = clazz,
+            scalaFieldClasses = ctx.parameters.map(_.typeclass.getTypeClass).toArray,
             scalaFieldSerializers = ctx.parameters.map(_.typeclass.createSerializer(config)).toArray
           )
         }
@@ -65,38 +66,6 @@ private[api] trait LowPrioImplicits {
 
   private def typeName(tn: magnolia1.TypeName): String =
     s"${tn.full}[${tn.typeArguments.map(typeName).mkString(",")}]"
-
-  private def loadClass(name: String): Option[Class[_]] = {
-    val sanitized = name.replace("::", "$colon$colon")
-    Try(Class.forName(sanitized)) match {
-      case Failure(_) =>
-        Try(Class.forName(sanitized + "$")) match {
-          case Failure(_)     => None
-          case Success(value) => Some(value)
-        }
-      case Success(value) => Some(value)
-    }
-  }
-
-  private def replaceLast(str: String, what: Char, dest: Char): Option[String] =
-    str.lastIndexOf(what.toInt) match {
-      case -1 => None
-      case pos =>
-        val arr = str.toCharArray
-        arr(pos) = dest
-        Some(new String(arr))
-    }
-
-  @tailrec
-  private def guessClass(name: String): Option[Class[_]] =
-    loadClass(name) match {
-      case Some(value) => Some(value)
-      case None =>
-        replaceLast(name, '.', '$') match {
-          case None       => None
-          case Some(next) => guessClass(next)
-        }
-    }
 
   implicit def deriveTypeInformation[T]: TypeInformation[T] = macro Magnolia.gen[T]
 }

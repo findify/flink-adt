@@ -17,22 +17,31 @@
  */
 package io.findify.flinkadt.api.serializer
 
-import io.findify.flinkadt.api.serializer.ScalaCaseClassSerializer.lookupConstructor
 import org.apache.flink.api.common.typeutils.{TypeSerializer, TypeSerializerSnapshot}
 
 import java.io.ObjectInputStream
 
 /** This is a non macro-generated, concrete Scala case class serializer.
-  * Copied from Flink 1.14 without `SelfResolvingTypeSerializer`.
+  * Copied from Flink 1.14 with two changes:
+  * 1. Does not extend `SelfResolvingTypeSerializer`, since we're breaking compatibility anyway.
+  * 2. Provides class information for each field, which are necessary for constructor lookup in Scala 3.
   */
 @SerialVersionUID(1L)
 class ScalaCaseClassSerializer[T <: Product](
     clazz: Class[T],
+    scalaFieldClasses: Array[Class[_]],
     scalaFieldSerializers: Array[TypeSerializer[_]]
-) extends CaseClassSerializer[T](clazz, scalaFieldSerializers) {
+) extends CaseClassSerializer[T](clazz, scalaFieldSerializers)
+    with ConstructorCompat {
+  // Creates a copy of field classes, instead of providing the array reference.
+  // Necessary for creating a serializer from the associated snapshot class.
+  def fieldClasses(): Array[Class[_]] =
+    scalaFieldClasses.map(identity)
 
+  // Indirectly enable constructor look-up.
+  // Underlying implementation is major version-specific (Scala 2 vs. Scala 3).
   @transient
-  private var constructor = lookupConstructor(clazz)
+  private var constructor = lookupConstructor(clazz, scalaFieldClasses)
 
   override def createInstance(fields: Array[AnyRef]): T = {
     constructor(fields)
@@ -45,10 +54,6 @@ class ScalaCaseClassSerializer[T <: Product](
   // This should be removed once we make sure that serializer are no long java serialized.
   private def readObject(in: ObjectInputStream): Unit = {
     in.defaultReadObject()
-    constructor = lookupConstructor(clazz)
+    constructor = lookupConstructor(clazz, scalaFieldClasses)
   }
 }
-
-// Indirectly enable constructor look-up.
-// Underlying implementation is major version-specific (Scala 2 vs. Scala 3).
-object ScalaCaseClassSerializer extends ConstructorCompat
