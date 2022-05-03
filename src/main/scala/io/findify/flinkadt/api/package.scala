@@ -2,13 +2,19 @@ package io.findify.flinkadt
 
 import io.findify.flinkadt.api.serializer._
 import io.findify.flinkadt.api.typeinfo._
+import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.api.common.typeutils.TypeSerializer
 import org.apache.flink.api.common.typeutils.base.array._
 
+import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
 
 package object api extends LowPrioImplicits {
+  override protected val config: ExecutionConfig = new ExecutionConfig()
+
+  override protected val cache: mutable.Map[String, Typeclass[_]] = mutable.Map[String, TypeInformation[_]]()
+
   implicit def into2ser[T](implicit ti: TypeInformation[T]): TypeSerializer[T] = ti.createSerializer(config)
 
   implicit def optionSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Option[T]] =

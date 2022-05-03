@@ -13,11 +13,10 @@ import scala.reflect._
 import scala.reflect.runtime.universe.{Try => _, _}
 import scala.util.{Failure, Success, Try}
 
-trait LowPrioImplicits {
-  protected val config: ExecutionConfig = new ExecutionConfig()
+private[api] trait LowPrioImplicits {
+  protected def config: ExecutionConfig
 
-  protected val cache: mutable.Map[String, Typeclass[_]] =
-    mutable.Map[String, TypeInformation[_]]()
+  protected def cache: mutable.Map[String, Typeclass[_]]
 
   type Typeclass[T] = TypeInformation[T]
 
@@ -55,9 +54,9 @@ trait LowPrioImplicits {
         val serializer = new CoproductSerializer[T](
           subtypeClasses = ctx.subtypes
             .map(_.typeName)
-            .map(c => {
+            .map { c =>
               guessClass(c.full).getOrElse(throw new ClassNotFoundException(c.full))
-            })
+            }
             .toArray,
           subtypeSerializers = ctx.subtypes.map(_.typeclass.createSerializer(config)).toArray
         )
