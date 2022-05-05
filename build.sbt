@@ -7,7 +7,7 @@ lazy val `scala 2.13` = "2.13.8"
 lazy val `scala 3`    = "3.1.2"
 
 scalaVersion := `scala 2.13`
-crossScalaVersions := Seq(`scala 2.12`, `scala 2.13`)
+crossScalaVersions := Seq(`scala 2.12`, `scala 2.13`, `scala 3`)
 
 organization := "io.findify"
 licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
@@ -29,6 +29,15 @@ scalacOptions ++= Seq(
   "-feature",
   "-language:higherKinds"
 )
+
+// Need extra leniency on how much we can inline during typeinfo derivation.
+scalacOptions ++= {
+  if (scalaVersion.value.startsWith("3")) {
+    Seq("-Xmax-inlines", "128")
+  } else {
+    Nil
+  }
+}
 
 lazy val flinkVersion = "1.15.0"
 
