@@ -38,7 +38,11 @@ class ScalaCaseClassSerializer[T <: Product](
   def fieldClasses(): Array[Class[_]] =
     scalaFieldClasses.map(identity)
 
-  // Indirectly enable constructor look-up.
+  // In Flink, serializers & serializer snapshotters have strict ser/de requirements.
+  // Both need to be capable of creating one another.
+  // Anything passed to a serializer therefore needs to be ser/de compatible.
+  // The easiest method is to serialize class names during the snapshotting phase.
+  // During restoration, those class names are deserialized and instantiated via a class loader.
   // Underlying implementation is major version-specific (Scala 2 vs. Scala 3).
   @transient
   private var constructor = lookupConstructor(clazz, scalaFieldClasses)
