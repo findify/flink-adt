@@ -79,6 +79,11 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors with Test
     all(ser, WrappedADT(Bar(1)))
   }
 
+  it should "derive for generic ADTs" in {
+    val ser = implicitly[TypeInformation[Param[Int]]].createSerializer(null)
+    all(ser, P2(1))
+  }
+
   it should "derive seq" in {
     val ser = implicitly[TypeInformation[SimpleSeq]].createSerializer(null)
     noKryo(ser)
