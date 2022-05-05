@@ -8,7 +8,6 @@ import io.findify.flinkadt.AnyTest.FAny.FValueAny.FTerm.StringTerm
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import cats.implicits
 
 class AnyTest extends AnyFlatSpec with Matchers with TestUtils {
   it should "serialize concrete class" in {
