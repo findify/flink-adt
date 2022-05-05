@@ -18,7 +18,7 @@ private[api] trait LowPrioImplicits {
 
   protected def config: ExecutionConfig
 
-  protected def cache: mutable.Map[String, Typeclass[_]]
+  protected def cache: mutable.Map[String, TypeInformation[_]]
 
   def join[T <: Product: ClassTag: TypeTag](
       ctx: CaseClass[TypeInformation, T]

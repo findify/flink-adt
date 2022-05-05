@@ -3,12 +3,13 @@ package io.findify.flinkadt.api.serializer
 import scala.annotation.nowarn
 import scala.reflect.runtime.universe
 
+import io.findify.flinkadt.api.drop
+
 private[serializer] trait ConstructorCompat {
-  // Parameter classes are required for the Scala 3 implementation,
-  // so need to match the method signature here.
+  // Parameter classes are required for the Scala 3 implementation, so need to match the method signature here.
   @nowarn("msg=(eliminated by erasure)|(explicit array)")
-  def lookupConstructor[T](cls: Class[T], parameterClasses: Array[Class[_]]): Array[AnyRef] => T = {
-    val _           = parameterClasses
+  final def lookupConstructor[T](cls: Class[T], parameterClasses: Array[Class[_]]): Array[AnyRef] => T = {
+    drop(parameterClasses)
     val rootMirror  = universe.runtimeMirror(cls.getClassLoader)
     val classSymbol = rootMirror.classSymbol(cls)
 
@@ -35,8 +36,6 @@ private[serializer] trait ConstructorCompat {
     val classMirror             = rootMirror.reflectClass(classSymbol)
     val constructorMethodMirror = classMirror.reflectConstructor(primaryConstructorSymbol)
 
-    (arr: Array[AnyRef]) => {
-      constructorMethodMirror.apply(arr: _*).asInstanceOf[T]
-    }
+    { (arr: Array[AnyRef]) => constructorMethodMirror.apply(arr: _*).asInstanceOf[T] }
   }
 }
