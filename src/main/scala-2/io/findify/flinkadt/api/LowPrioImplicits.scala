@@ -33,7 +33,6 @@ private[api] trait LowPrioImplicits {
         } else {
           new ScalaCaseClassSerializer[T](
             clazz = clazz,
-            scalaFieldClasses = ctx.parameters.map(_.typeclass.getTypeClass).toArray,
             scalaFieldSerializers = ctx.parameters.map(_.typeclass.createSerializer(config)).toArray
           )
         }

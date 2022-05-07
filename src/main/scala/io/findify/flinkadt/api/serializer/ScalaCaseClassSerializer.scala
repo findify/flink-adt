@@ -24,19 +24,15 @@ import java.io.ObjectInputStream
 /** This is a non macro-generated, concrete Scala case class serializer.
   * Copied from Flink 1.14 with two changes:
   * 1. Does not extend `SelfResolvingTypeSerializer`, since we're breaking compatibility anyway.
-  * 2. Provides class information for each field, which are necessary for constructor lookup in Scala 3.
+  * 2. Move `lookupConstructor` to version-specific sources.
   */
 @SerialVersionUID(1L)
 class ScalaCaseClassSerializer[T <: Product](
     clazz: Class[T],
-    scalaFieldClasses: Array[Class[_]],
     scalaFieldSerializers: Array[TypeSerializer[_]]
 ) extends CaseClassSerializer[T](clazz, scalaFieldSerializers)
     with ConstructorCompat {
-  // Creates a copy of field classes, instead of providing the array reference.
-  // Necessary for creating a serializer from the associated snapshot class.
-  def fieldClasses(): Array[Class[_]] =
-    scalaFieldClasses.map(identity)
+  private[this] val numFields = scalaFieldSerializers.length
 
   // In Flink, serializers & serializer snapshotters have strict ser/de requirements.
   // Both need to be capable of creating one another.
@@ -45,7 +41,7 @@ class ScalaCaseClassSerializer[T <: Product](
   // During restoration, those class names are deserialized and instantiated via a class loader.
   // Underlying implementation is major version-specific (Scala 2 vs. Scala 3).
   @transient
-  private var constructor = lookupConstructor(clazz, scalaFieldClasses)
+  private var constructor = lookupConstructor(clazz, numFields)
 
   override def createInstance(fields: Array[AnyRef]): T = {
     constructor(fields)
@@ -58,6 +54,6 @@ class ScalaCaseClassSerializer[T <: Product](
   // This should be removed once we make sure that serializer are no long java serialized.
   private def readObject(in: ObjectInputStream): Unit = {
     in.defaultReadObject()
-    constructor = lookupConstructor(clazz, scalaFieldClasses)
+    constructor = lookupConstructor(clazz, numFields)
   }
 }

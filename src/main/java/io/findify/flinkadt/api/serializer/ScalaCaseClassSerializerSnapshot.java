@@ -27,7 +27,6 @@ import org.apache.flink.core.memory.DataOutputView;
 import org.apache.flink.util.InstantiationUtil;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Objects;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
@@ -38,24 +37,20 @@ import static org.apache.flink.util.Preconditions.checkState;
 public final class ScalaCaseClassSerializerSnapshot<T extends scala.Product>
         extends CompositeTypeSerializerSnapshot<T, ScalaCaseClassSerializer<T>> {
 
-    private static final int VERSION = 3;
+    private static final int VERSION = 2;
 
     private Class<T> type;
-
-    private Class<?>[] fieldTypes;
 
     /** Used via reflection. */
     @SuppressWarnings("unused")
     public ScalaCaseClassSerializerSnapshot() {
         super(ScalaCaseClassSerializer.class);
-        fieldTypes = new Class<?>[]{};
     }
 
     /** Used for the snapshot path. */
     public ScalaCaseClassSerializerSnapshot(ScalaCaseClassSerializer<T> serializerInstance) {
         super(serializerInstance);
         this.type = checkNotNull(serializerInstance.getTupleClass(), "tuple class can not be NULL");
-        this.fieldTypes = checkNotNull(serializerInstance.fieldClasses(), "field types can not be NULL");
     }
 
     @Override
@@ -73,20 +68,13 @@ public final class ScalaCaseClassSerializerSnapshot<T extends scala.Product>
     protected ScalaCaseClassSerializer<T> createOuterSerializerWithNestedSerializers(
             TypeSerializer<?>[] nestedSerializers) {
         checkState(type != null, "type can not be NULL");
-        checkState(fieldTypes != null, "field types can not be NULL");
-        return new ScalaCaseClassSerializer<>(type, fieldTypes, nestedSerializers);
+        return new ScalaCaseClassSerializer<>(type, nestedSerializers);
     }
 
     @Override
     protected void writeOuterSnapshot(DataOutputView out) throws IOException {
         checkState(type != null, "type can not be NULL");
-        checkState(fieldTypes != null, "field types can not be NULL");
-
         out.writeUTF(type.getName());
-        out.writeInt(fieldTypes.length);
-        for (Class<?> fieldType : fieldTypes) {
-            out.writeUTF(fieldType.getName());
-        }
     }
 
     @Override
@@ -94,21 +82,12 @@ public final class ScalaCaseClassSerializerSnapshot<T extends scala.Product>
             int readOuterSnapshotVersion, DataInputView in, ClassLoader userCodeClassLoader)
             throws IOException {
         this.type = InstantiationUtil.resolveClassByName(in, userCodeClassLoader);
-
-        int length = in.readInt();
-        Class<?>[] fields = new Class[length];
-        for (int i = 0; i < length; i++) {
-            fields[i] = InstantiationUtil.resolveClassByName(in, userCodeClassLoader);
-        }
-
-        this.fieldTypes = fields;
     }
 
     @Override
     protected CompositeTypeSerializerSnapshot.OuterSchemaCompatibility
     resolveOuterSchemaCompatibility(ScalaCaseClassSerializer<T> newSerializer) {
-        if (Objects.equals(type, newSerializer.getTupleClass()) &&
-                Arrays.equals(fieldTypes, newSerializer.fieldClasses())) {
+        if (Objects.equals(type, newSerializer.getTupleClass())) {
             return OuterSchemaCompatibility.COMPATIBLE_AS_IS;
         } else {
             return OuterSchemaCompatibility.INCOMPATIBLE;
