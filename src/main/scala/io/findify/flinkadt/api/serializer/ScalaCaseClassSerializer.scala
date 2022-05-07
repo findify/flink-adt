@@ -17,25 +17,35 @@
  */
 package io.findify.flinkadt.api.serializer
 
-import io.findify.flinkadt.api.serializer.ScalaCaseClassSerializer.lookupConstructor
 import org.apache.flink.api.common.typeutils.{TypeSerializer, TypeSerializerSnapshot}
 
 import java.io.ObjectInputStream
 
-import scala.annotation.nowarn
-import scala.reflect.runtime.universe
-
 /** This is a non macro-generated, concrete Scala case class serializer.
-  * Copied from Flink 1.14 without `SelfResolvingTypeSerializer`.
+  * Copied from Flink 1.14 with two changes:
+  * 1. Does not extend `SelfResolvingTypeSerializer`, since we're breaking compatibility anyway.
+  * 2. Provides class information for each field, which are necessary for constructor lookup in Scala 3.
   */
 @SerialVersionUID(1L)
 class ScalaCaseClassSerializer[T <: Product](
     clazz: Class[T],
+    scalaFieldClasses: Array[Class[_]],
     scalaFieldSerializers: Array[TypeSerializer[_]]
-) extends CaseClassSerializer[T](clazz, scalaFieldSerializers) {
+) extends CaseClassSerializer[T](clazz, scalaFieldSerializers)
+    with ConstructorCompat {
+  // Creates a copy of field classes, instead of providing the array reference.
+  // Necessary for creating a serializer from the associated snapshot class.
+  def fieldClasses(): Array[Class[_]] =
+    scalaFieldClasses.map(identity)
 
+  // In Flink, serializers & serializer snapshotters have strict ser/de requirements.
+  // Both need to be capable of creating one another.
+  // Anything passed to a serializer therefore needs to be ser/de compatible.
+  // The easiest method is to serialize class names during the snapshotting phase.
+  // During restoration, those class names are deserialized and instantiated via a class loader.
+  // Underlying implementation is major version-specific (Scala 2 vs. Scala 3).
   @transient
-  private var constructor = lookupConstructor(clazz)
+  private var constructor = lookupConstructor(clazz, scalaFieldClasses)
 
   override def createInstance(fields: Array[AnyRef]): T = {
     constructor(fields)
@@ -48,41 +58,6 @@ class ScalaCaseClassSerializer[T <: Product](
   // This should be removed once we make sure that serializer are no long java serialized.
   private def readObject(in: ObjectInputStream): Unit = {
     in.defaultReadObject()
-    constructor = lookupConstructor(clazz)
-  }
-}
-
-object ScalaCaseClassSerializer {
-  @nowarn("msg=(eliminated by erasure)|(explicit array)")
-  def lookupConstructor[T](cls: Class[T]): Array[AnyRef] => T = {
-    val rootMirror  = universe.runtimeMirror(cls.getClassLoader)
-    val classSymbol = rootMirror.classSymbol(cls)
-
-    require(
-      classSymbol.isStatic,
-      s"""
-         |The class ${cls.getSimpleName} is an instance class, meaning it is not a member of a
-         |toplevel object, or of an object contained in a toplevel object,
-         |therefore it requires an outer instance to be instantiated, but we don't have a
-         |reference to the outer instance. Please consider changing the outer class to an object.
-         |""".stripMargin
-    )
-
-    val primaryConstructorSymbol = classSymbol.toType
-      .decl(universe.termNames.CONSTRUCTOR)
-      .alternatives
-      .collectFirst {
-        case constructorSymbol: universe.MethodSymbol if constructorSymbol.isPrimaryConstructor =>
-          constructorSymbol
-      }
-      .head
-      .asMethod
-
-    val classMirror             = rootMirror.reflectClass(classSymbol)
-    val constructorMethodMirror = classMirror.reflectConstructor(primaryConstructorSymbol)
-
-    (arr: Array[AnyRef]) => {
-      constructorMethodMirror.apply(arr: _*).asInstanceOf[T]
-    }
+    constructor = lookupConstructor(clazz, scalaFieldClasses)
   }
 }

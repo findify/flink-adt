@@ -1,6 +1,6 @@
 package io.findify.flinkadt
 
-import io.findify.flinkadt.TypeInfoTest.{ADT, ListedArray, ListedList, ListedMap, Parametrized, Simple}
+import io.findify.flinkadt.TypeInfoTest.{ADT, ListedArray, ListedList, ListedMap, Parameterized, Simple}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -11,8 +11,8 @@ class TypeInfoTest extends AnyFlatSpec with Matchers {
     drop(deriveTypeInformation[Simple])
   }
 
-  it should "derive parametrized classes" in {
-    drop(deriveTypeInformation[Parametrized[String]])
+  it should "derive parameterized classes" in {
+    drop(deriveTypeInformation[Parameterized[String]])
   }
 
   it should "derive lists" in {
@@ -33,7 +33,7 @@ class TypeInfoTest extends AnyFlatSpec with Matchers {
 }
 
 object TypeInfoTest {
-  case class Parametrized[T](a: T)
+  case class Parameterized[T](a: T)
   case class Simple(a: String, b: Int)
   case class ListedList(x: List[String])
   case class ListedArray(x: Array[String])

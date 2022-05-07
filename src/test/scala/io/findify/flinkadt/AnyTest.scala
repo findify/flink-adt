@@ -1,15 +1,15 @@
 package io.findify.flinkadt
 
 import cats.data.NonEmptyList
-import io.findify.flinkadt.AnyTest.FAny
-import io.findify.flinkadt.AnyTest.Filter.{FTerm, StringTerm, TermFilter}
+import io.findify.flinkadt.api._
+import io.findify.flinkadt.AnyTest._
+import io.findify.flinkadt.AnyTest.FAny.FValueAny.FTerm
+import io.findify.flinkadt.AnyTest.FAny.FValueAny.FTerm.StringTerm
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class AnyTest extends AnyFlatSpec with Matchers with TestUtils {
-  import io.findify.flinkadt.api._
-
   it should "serialize concrete class" in {
     val ser = implicitly[TypeInformation[StringTerm]].createSerializer(null)
     roundtrip(ser, StringTerm("fo"))
@@ -29,27 +29,48 @@ class AnyTest extends AnyFlatSpec with Matchers with TestUtils {
     val ser = implicitly[TypeInformation[TermFilter]].createSerializer(null)
     roundtrip(ser, TermFilter("a", NonEmptyList.one(StringTerm("fo"))))
   }
-
 }
 
 object AnyTest {
   sealed trait FAny
 
-  sealed trait FValueAny extends FAny {
-    def value: Any
-  }
-  object Filter {
-    sealed trait FTerm extends FValueAny
-    case class StringTerm(value: String) extends FTerm {
-      type T = String
-    }
-    case class NumericTerm(value: Double) extends FTerm {
-      type T = Double
+  object FAny {
+    sealed trait FValueAny extends FAny {
+      def value: Any
     }
 
-    case class TermFilter(
-        field: String,
-        values: NonEmptyList[FTerm]
-    )
+    object FValueAny {
+      sealed trait FTerm extends FValueAny
+
+      object FTerm {
+        case class StringTerm(value: String) extends FTerm {
+          type T = String
+        }
+
+        object StringTerm {
+          implicit val stringTermTi: TypeInformation[StringTerm] = deriveTypeInformation
+        }
+
+        case class NumericTerm(value: Double) extends FTerm {
+          type T = Double
+        }
+
+        object NumericTerm {
+          implicit val numericTermTi: TypeInformation[NumericTerm] = deriveTypeInformation
+        }
+
+        implicit val fTermTi: TypeInformation[FTerm] = deriveTypeInformation
+      }
+
+      implicit val fValueAnyTi: TypeInformation[FValueAny] = deriveTypeInformation
+    }
+
+    implicit val fAnyTi: TypeInformation[FAny] = deriveTypeInformation
+  }
+
+  case class TermFilter(field: String, values: NonEmptyList[FTerm])
+
+  object TermFilter {
+    implicit val termFilterTi: TypeInformation[TermFilter] = deriveTypeInformation
   }
 }
