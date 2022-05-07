@@ -6,10 +6,10 @@ import scala.reflect.runtime.universe
 import io.findify.flinkadt.api.drop
 
 private[serializer] trait ConstructorCompat {
-  // Parameter classes are required for the Scala 3 implementation, so need to match the method signature here.
+  // # fields is required for the Scala 3 implementation, so need to match the method signature here.
   @nowarn("msg=(eliminated by erasure)|(explicit array)")
-  final def lookupConstructor[T](cls: Class[T], parameterClasses: Array[Class[_]]): Array[AnyRef] => T = {
-    drop(parameterClasses)
+  final def lookupConstructor[T](cls: Class[T], numFields: Int): Array[AnyRef] => T = {
+    drop(numFields)
     val rootMirror  = universe.runtimeMirror(cls.getClassLoader)
     val classSymbol = rootMirror.classSymbol(cls)
 

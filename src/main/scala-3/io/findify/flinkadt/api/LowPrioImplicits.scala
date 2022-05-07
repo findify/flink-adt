@@ -38,7 +38,6 @@ private[api] trait LowPrioImplicits extends TaggedDerivation[TypeInformation]:
         else
           new ScalaCaseClassSerializer[T & Product](
             clazz = clazz,
-            scalaFieldClasses = IArray.genericWrapArray(ctx.params.map(_.typeclass.getTypeClass)).toArray,
             scalaFieldSerializers = IArray.genericWrapArray(ctx.params.map(_.typeclass.createSerializer(config))).toArray
           )
         val ti = new ProductTypeInformation[T & Product](
