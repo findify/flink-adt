@@ -21,7 +21,6 @@ package io.findify.flinkadt.api.serializer;
 import org.apache.flink.annotation.Internal;
 import org.apache.flink.api.common.typeutils.CompositeTypeSerializerSnapshot;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
-import org.apache.flink.api.common.typeutils.TypeSerializerConfigSnapshot;
 import org.apache.flink.api.common.typeutils.TypeSerializerSnapshot;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
@@ -46,21 +45,6 @@ public final class ScalaCaseClassSerializerSnapshot<T extends scala.Product>
     @SuppressWarnings("unused")
     public ScalaCaseClassSerializerSnapshot() {
         super(ScalaCaseClassSerializer.class);
-    }
-
-    /**
-     * Used for delegating schema compatibility checks from serializers that were previously using
-     * {@code TupleSerializerConfigSnapshot}. Type is the {@code outerSnapshot} information, that is
-     * required to perform {@link #internalResolveSchemaCompatibility(TypeSerializer,
-     * TypeSerializerSnapshot[])}.
-     *
-     * <p>This is used in {@link
-     * ScalaCaseClassSerializer#resolveSchemaCompatibilityViaRedirectingToNewSnapshotClass(TypeSerializerConfigSnapshot)}.
-     */
-    @Internal
-    ScalaCaseClassSerializerSnapshot(Class<T> type) {
-        super(ScalaCaseClassSerializer.class);
-        this.type = checkNotNull(type, "type can not be NULL");
     }
 
     /** Used for the snapshot path. */
@@ -103,8 +87,10 @@ public final class ScalaCaseClassSerializerSnapshot<T extends scala.Product>
     @Override
     protected CompositeTypeSerializerSnapshot.OuterSchemaCompatibility
     resolveOuterSchemaCompatibility(ScalaCaseClassSerializer<T> newSerializer) {
-        return (Objects.equals(type, newSerializer.getTupleClass()))
-                ? OuterSchemaCompatibility.COMPATIBLE_AS_IS
-                : OuterSchemaCompatibility.INCOMPATIBLE;
+        if (Objects.equals(type, newSerializer.getTupleClass())) {
+            return OuterSchemaCompatibility.COMPATIBLE_AS_IS;
+        } else {
+            return OuterSchemaCompatibility.INCOMPATIBLE;
+        }
     }
 }

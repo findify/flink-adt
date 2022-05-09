@@ -13,7 +13,7 @@ more Scala-specific TypeSerializer & TypeInformation derivation support.
   in the current scope
 * has no silent fallback to Kryo: it will just fail the compilation in a case when serializer cannot be made
 * reuses all the low-level serialization code from Flink for basic Java and Scala types
-* supports Scala 2.12 & 2.13.
+* supports Scala 2.12, 2.13 & 3.
 * built for scala-free Flink 1.15, which supports arbitrary Scala versions.
 
 Issues:

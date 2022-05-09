@@ -124,7 +124,7 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors with Test
   }
 
 //  it should "derive nested generic type bounded classes" in {
-//    val ser = deriveTypeInformation[NestedParent].createSerializer(null)
+//    val ser = implicitly[TypeInformation[NestedParent]].createSerializer(null)
 //    noKryo(ser)
 //  }
 
