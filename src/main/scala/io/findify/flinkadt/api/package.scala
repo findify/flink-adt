@@ -2,12 +2,12 @@ package io.findify.flinkadt
 
 import io.findify.flinkadt.api.mapper.{BigDecMapper, BigIntMapper}
 import io.findify.flinkadt.api.serializer.MappedSerializer.TypeMapper
-import io.findify.flinkadt.api.serializer.*
-import io.findify.flinkadt.api.typeinfo.*
+import io.findify.flinkadt.api.serializer._
+import io.findify.flinkadt.api.typeinfo._
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.api.common.typeutils.TypeSerializer
-import org.apache.flink.api.common.typeutils.base.array.*
+import org.apache.flink.api.common.typeutils.base.array._
 
 import java.math.BigInteger
 import scala.collection.mutable
