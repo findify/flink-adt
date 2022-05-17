@@ -13,7 +13,17 @@ trait TestUtils extends Matchers with Inspectors {
   def roundtrip[T](ser: TypeSerializer[T], in: T): Assertion = {
     val out = new ByteArrayOutputStream()
     ser.serialize(in, new DataOutputViewStreamWrapper(out))
-    val copy = ser.deserialize(new DataInputViewStreamWrapper(new ByteArrayInputStream(out.toByteArray)))
+    val snapBytes = new ByteArrayOutputStream()
+    ser.snapshotConfiguration().writeSnapshot(new DataOutputViewStreamWrapper(snapBytes))
+    val restoredSnapshot = ser.snapshotConfiguration()
+    restoredSnapshot
+      .readSnapshot(
+        restoredSnapshot.getCurrentVersion,
+        new DataInputViewStreamWrapper(new ByteArrayInputStream(snapBytes.toByteArray)),
+        ser.getClass.getClassLoader
+      )
+    val restoredSerializer = restoredSnapshot.restoreSerializer()
+    val copy               = restoredSerializer.deserialize(new DataInputViewStreamWrapper(new ByteArrayInputStream(out.toByteArray)))
     in shouldBe copy
   }
 

@@ -66,6 +66,8 @@ class SerializerSnapshotTest extends AnyFlatSpec with Matchers {
     roundtripSerializer(deriveTypeInformation[TraitMap].createSerializer(null))
   }
 
+  it should ""
+
   def roundtripSerializer[T](ser: TypeSerializer[T]): Assertion = {
     val snap   = ser.snapshotConfiguration()
     val buffer = new ByteArrayOutputStream()
