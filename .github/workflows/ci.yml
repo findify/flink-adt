@@ -32,7 +32,7 @@ jobs:
           cache-name: cache-sbt
         with:
           path: ~/.m2 ~/.coursier ~/.cache/coursier ~/.ivy2 ~/.sbt
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.sbt') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
