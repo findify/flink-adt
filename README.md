@@ -25,7 +25,7 @@ compiles OK. 2022.1 is fine with serializers derived with this library.
 
 `flink-adt` is released to Maven-central. For SBT, add this snippet to `build.sbt`:
 ```scala
-libraryDependencies += "io.findify" %% "flink-adt" % "0.5.0"
+libraryDependencies += "io.findify" %% "flink-adt" % "0.6.1"
 ```
 
 To use this library, swap `import org.apache.flink.api.scala._` with `import io.findify.flinkadt.api._` and enjoy.
@@ -50,6 +50,71 @@ function, which may happily generate you a kryo-based serializer in a place you 
 to do this type of wildcard import, make sure that you explicitly called `deriveTypeInformation`
 for all the sealed traits in the current scope.
 
+## Java types
+
+flink-adt is a scala-specific library and won't derive TypeInformation for java classes (as they don't extend the `scala.Product` type).
+But you can always fall back to flink's own POJO serializer in this way, so just make it implicit so flink-adt can pick it up:
+
+```scala
+import java.date.LocalDate
+implicit val localDateTypeInfo: TypeInformation[LocalDate] = TypeInformation.of(classOf[LocalDate])
+```
+
+## Type mapping
+
+Sometimes flink-adt may spot a type (usually a java one), which cannot be directly serialized as a case class, like this 
+example:
+```scala
+  class WrappedString {
+    private var internal: String = ""
+
+    override def equals(obj: Any): Boolean = obj match {
+      case s: WrappedString => s.get == internal
+      case _                => false
+    }
+    def get: String = internal
+    def put(value: String) = {
+      internal = value
+    }
+  }
+```
+
+You can write a pair of explicit `TypeInformation[WrappedString]` and `Serializer[WrappedString]`, but it's extremely verbose,
+and the class itself can be 1-to-1 mapped to a regular `String`. Flink-adt has a mechanism of type mappers to delegate serialization
+of non-serializable types to existing serializers. For example:
+```scala
+  class WrappedMapper extends TypeMapper[WrappedString, String] {
+    override def map(a: WrappedString): String = a.get
+
+    override def contramap(b: String): WrappedString = {
+      val str = new WrappedString
+      str.put(b)
+      str
+    }
+  }
+  implicit val mapper: TypeMapper[WrappedString, String] = new WrappedMapper()
+  // will treat WrappedString with String typeinfo:
+  implicit val ti: TypeInformation[WrappedString] = implicitly[TypeInformation[WrappedString]] 
+```
+
+When there is a `TypeMapper[A,B]` in the scope to convert `A` to `B` and back, and type `B` has `TypeInformation[B]` available 
+in the scope also, then flink-adt will use a delegated existing typeinfo for `B` when it will spot type `A`.
+
+Warning: on Scala 3, the TypeMapper should not be made anonymous. This example won't work, as anonymous implicit classes in 
+scala 3 are private, and Flink cannot instantiate it on restore without jvm17 incompatible reflection hacks:
+```scala
+  // anonymous class, will fail on runtime on scala 3
+  implicit val mapper: TypeMapper[WrappedString, String] = new TypeMapper[WrappedString, String] {
+    override def map(a: WrappedString): String = a.get
+
+    override def contramap(b: String): WrappedString = {
+      val str = new WrappedString
+      str.put(b)
+      str
+    }
+  }
+```
+
 ## Schema evolution
 
 For the child case classes being part of ADT, `flink-adt` uses a Flink's `ScalaCaseClassSerializer`, so all the compatibility rules
@@ -65,6 +130,9 @@ For the sealed trait membership itself, `flink-adt` used an own serialization fo
 
 This project uses a separate set of serializers for collections, instead of Flink's own TraversableSerializer. So probably you
 may have issues while migrating state snapshots from TraversableSerializer to FlinkADT ones.
+
+Starting from version 0.5.0+, this project strictly depends on Flink 1.15+, as starting from this version it can be cross-built 
+for scala 2.13 and scala 3.
 
 ## Licence
 

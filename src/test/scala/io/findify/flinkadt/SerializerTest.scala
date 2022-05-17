@@ -168,9 +168,32 @@ class SerializerTest extends AnyFlatSpec with Matchers with Inspectors with Test
     roundtrip(ser, NonEmptyList.one("a"))
   }
 
+  it should "serialize unit" in {
+    val ser = implicitly[TypeInformation[Unit]].createSerializer(null)
+    roundtrip(ser, ())
+  }
+
   it should "serialize triple-nested case clases" in {
     val ser = implicitly[TypeInformation[Seq[NestedBottom]]].createSerializer(null)
     roundtrip(ser, List(NestedBottom(Some("a"), None)))
+  }
+
+  it should "serialize classes with type mapper" in {
+    import MappedTypeInfoTest._
+    val ser = implicitly[TypeInformation[WrappedString]].createSerializer(null)
+    val str = new WrappedString()
+    str.put("foo")
+    roundtrip(ser, str)
+  }
+
+  it should "serialize bigint" in {
+    val ser = implicitly[TypeInformation[BigInt]].createSerializer(null)
+    roundtrip(ser, BigInt(123))
+  }
+
+  it should "serialize bigdec" in {
+    val ser = implicitly[TypeInformation[BigDecimal]].createSerializer(null)
+    roundtrip(ser, BigDecimal(123))
   }
 
 }
