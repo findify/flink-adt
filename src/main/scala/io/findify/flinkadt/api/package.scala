@@ -18,6 +18,14 @@ package object api extends LowPrioImplicits {
 
   override protected val cache: mutable.Map[String, Typeclass[_]] = mutable.Map[String, TypeInformation[_]]()
 
+  /** Summon existing type information.
+    * Equivalent to `implicitly` / `summon` in Scala 2 / 3 respectively.
+    * @param ti Existing type information within scope.
+    * @tparam T Underlying type.
+    * @return Existing type information.
+    */
+  def typeInformation[T](implicit ti: TypeInformation[T]): TypeInformation[T] = ti
+
   implicit def into2ser[T](implicit ti: TypeInformation[T]): TypeSerializer[T] = ti.createSerializer(config)
 
   implicit def optionSerializer[T](implicit vs: TypeSerializer[T]): TypeSerializer[Option[T]] =
