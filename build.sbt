@@ -1,6 +1,6 @@
 name := "flink-adt"
 
-version := "0.5.0"
+version := "0.6.1"
 
 lazy val `scala 2.12` = "2.12.15"
 lazy val `scala 2.13` = "2.13.8"
