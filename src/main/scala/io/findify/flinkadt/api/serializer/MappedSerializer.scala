@@ -1,20 +1,13 @@
 package io.findify.flinkadt.api.serializer
 
 import io.findify.flinkadt.api.serializer.MappedSerializer.{MappedSerializerSnapshot, TypeMapper}
-import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.common.typeutils.{
-  CompositeTypeSerializerSnapshot,
-  GenericTypeSerializerSnapshot,
-  SimpleTypeSerializerSnapshot,
-  TypeSerializer,
-  TypeSerializerSchemaCompatibility,
-  TypeSerializerSnapshot
-}
+import org.apache.flink.api.common.typeutils.{TypeSerializer, TypeSerializerSchemaCompatibility, TypeSerializerSnapshot}
 import org.apache.flink.core.memory.{DataInputView, DataOutputView}
 import org.apache.flink.util.InstantiationUtil
 
 case class MappedSerializer[A, B](mapper: TypeMapper[A, B], ser: TypeSerializer[B]) extends SimpleSerializer[A] {
-  override def equals(obj: Any): Boolean = ser.equals(obj)
+  // Intentionally uses `==`, properly handles `null` during equality check.
+  override def equals(obj: Any): Boolean = ser == obj
 
   override def toString: String = ser.toString
 
