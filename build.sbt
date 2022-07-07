@@ -4,7 +4,7 @@ version := "0.6.1"
 
 lazy val `scala 2.12` = "2.12.15"
 lazy val `scala 2.13` = "2.13.8"
-lazy val `scala 3`    = "3.1.2"
+lazy val `scala 3`    = "3.1.3"
 
 scalaVersion := `scala 2.13`
 crossScalaVersions := Seq(`scala 2.12`, `scala 2.13`, `scala 3`)
