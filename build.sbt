@@ -39,7 +39,7 @@ scalacOptions ++= {
   }
 }
 
-lazy val flinkVersion = "1.15.0"
+lazy val flinkVersion = "1.15.4"
 
 libraryDependencies ++= Seq(
   "org.apache.flink" % "flink-java"       % flinkVersion % Provided,
