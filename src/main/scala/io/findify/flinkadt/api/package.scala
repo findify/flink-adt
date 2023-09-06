@@ -97,9 +97,9 @@ package object api extends LowPrioImplicits {
   implicit lazy val shortInfo: TypeInformation[Short]   = BasicTypeInfo.getInfoFor(classOf[Short])
 
   implicit lazy val bigDecMapper: TypeMapper[scala.BigDecimal, java.math.BigDecimal] = new BigDecMapper()
-  implicit lazy val bigDecInfo: TypeInformation[BigDecimal]                          = mappedTypeInfo[scala.BigDecimal, java.math.BigDecimal]
-  implicit lazy val bigIntMapper: TypeMapper[scala.BigInt, java.math.BigInteger]     = new BigIntMapper()
-  implicit lazy val bigIntInfo: TypeInformation[BigInt]                              = mappedTypeInfo[scala.BigInt, java.math.BigInteger]
+  implicit lazy val bigDecInfo: TypeInformation[BigDecimal] = mappedTypeInfo[scala.BigDecimal, java.math.BigDecimal]
+  implicit lazy val bigIntMapper: TypeMapper[scala.BigInt, java.math.BigInteger] = new BigIntMapper()
+  implicit lazy val bigIntInfo: TypeInformation[BigInt] = mappedTypeInfo[scala.BigInt, java.math.BigInteger]
 
   implicit lazy val unitInfo: TypeInformation[Unit] = new UnitTypeInformation()
   implicit def mappedTypeInfo[A: ClassTag, B](implicit
