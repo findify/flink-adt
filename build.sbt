@@ -6,12 +6,12 @@ lazy val `scala 2.12` = "2.12.15"
 lazy val `scala 2.13` = "2.13.8"
 lazy val `scala 3`    = "3.1.2"
 
-scalaVersion := `scala 2.13`
+scalaVersion       := `scala 2.13`
 crossScalaVersions := Seq(`scala 2.12`, `scala 2.13`, `scala 3`)
 
 organization := "io.findify"
-licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
-homepage := Some(url("https://github.com/findify/flink-adt"))
+licenses     := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
+homepage     := Some(url("https://github.com/findify/flink-adt"))
 
 publishMavenStyle := true
 
