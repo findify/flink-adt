@@ -52,7 +52,7 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= {
   if (scalaBinaryVersion.value.startsWith("2")) {
     Seq(
-      "com.softwaremill.magnolia1_2" %% "magnolia"      % "1.1.2",
+      "com.softwaremill.magnolia1_2" %% "magnolia"      % "1.1.10",
       "org.scala-lang"                % "scala-reflect" % scalaVersion.value % Provided
     )
   } else {
