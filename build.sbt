@@ -45,7 +45,7 @@ libraryDependencies ++= Seq(
   "org.apache.flink" % "flink-java"       % flinkVersion % Provided,
   "org.apache.flink" % "flink-test-utils" % flinkVersion % Test,
   "org.scalatest"   %% "scalatest"        % "3.2.12"     % Test,
-  "org.typelevel"   %% "cats-core"        % "2.7.0"      % Test
+  "org.typelevel"   %% "cats-core"        % "2.12.0"     % Test
 )
 
 // Macro libraries are based on major version.
