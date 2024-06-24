@@ -44,7 +44,7 @@ lazy val flinkVersion = "1.15.0"
 libraryDependencies ++= Seq(
   "org.apache.flink" % "flink-java"       % flinkVersion % Provided,
   "org.apache.flink" % "flink-test-utils" % flinkVersion % Test,
-  "org.scalatest"   %% "scalatest"        % "3.2.12"     % Test,
+  "org.scalatest"   %% "scalatest"        % "3.2.19"     % Test,
   "org.typelevel"   %% "cats-core"        % "2.7.0"      % Test
 )
 
